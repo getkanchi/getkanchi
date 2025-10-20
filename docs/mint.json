@@ -1,0 +1,106 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Kanchi",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#2DC1A3",
+    "light": "#3DD6B5",
+    "dark": "#229986",
+    "anchors": {
+      "from": "#2DC1A3",
+      "to": "#3AB9E3"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:support@getkanchi.com"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "https://github.com/getkanchi/kanchi"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/getkanchi/kanchi"
+    },
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/kanchi"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "installation"
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "pages": [
+        "core/architecture",
+        "core/task-monitoring",
+        "core/orphan-detection",
+        "core/worker-health",
+        "core/workflow-automation"
+      ]
+    },
+    {
+      "group": "Configuration",
+      "pages": [
+        "configuration/overview",
+        "configuration/environment",
+        "configuration/database",
+        "configuration/celery-integration"
+      ]
+    },
+    {
+      "group": "Features",
+      "pages": [
+        "features/real-time-monitoring",
+        "features/analytics",
+        "features/multi-environment",
+        "features/search-filtering"
+      ]
+    },
+    {
+      "group": "Deployment",
+      "pages": [
+        "deployment/docker",
+        "deployment/kubernetes",
+        "deployment/production-ready"
+      ]
+    },
+    {
+      "group": "API Documentation",
+      "pages": [
+        "api-reference/introduction",
+        "api-reference/authentication",
+        "api-reference/tasks",
+        "api-reference/workers",
+        "api-reference/workflows"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/getkanchi/kanchi",
+    "twitter": "https://twitter.com/getkanchi"
+  }
+}

@@ -1,0 +1,277 @@
+---
+title: 'Architecture'
+description: 'Understanding how Kanchi works under the hood'
+---
+
+## System Overview
+
+Kanchi is built as a standalone monitoring service that connects to your Celery broker and captures all task events in real-time.
+
+```mermaid
+graph LR
+    A[Celery Workers] -->|Events| B[Broker]
+    B -->|Subscribe| C[Kanchi]
+    C -->|WebSocket| D[Dashboard]
+    C -->|Store| E[PostgreSQL]
+```
+
+## Core Components
+
+### Event Capture Service
+
+The event capture service connects to your Celery broker and subscribes to all task events:
+
+- **Task Sent**: When a task is submitted
+- **Task Started**: When a worker begins execution
+- **Task Succeeded**: When a task completes successfully
+- **Task Failed**: When a task raises an exception
+- **Task Retried**: When a task is retried
+- **Worker Online/Offline**: Worker lifecycle events
+- **Worker Heartbeat**: Periodic health signals
+
+### Event Processing Pipeline
+
+```python
+Event → Validation → Enrichment → Storage → WebSocket Broadcast
+```
+
+1. **Validation**: Ensure event integrity
+2. **Enrichment**: Add metadata and relationships
+3. **Storage**: Persist to database
+4. **Broadcast**: Push to connected clients
+
+### Real-Time WebSocket Server
+
+Kanchi uses WebSockets for real-time updates:
+
+- **Zero Polling**: Push-based updates
+- **Efficient**: Smart event deduplication
+- **Scalable**: Handles thousands of concurrent connections
+
+### Database Layer
+
+PostgreSQL stores all historical data:
+
+- **Indexed Queries**: Fast search and filtering
+- **Connection Pooling**: Efficient resource usage
+- **Migrations**: Schema versioning with Alembic
+- **Partitioning**: Optional for high-volume deployments
+
+## Technology Stack
+
+### Backend
+
+- **FastAPI**: High-performance Python web framework
+- **SQLAlchemy**: ORM with async support
+- **Kombu**: Celery event subscription
+- **Pydantic**: Data validation and serialization
+- **WebSockets**: Real-time communication
+
+### Frontend
+
+- **Next.js**: React framework with SSR
+- **TypeScript**: Type-safe development
+- **TanStack Query**: Data fetching and caching
+- **Tailwind CSS**: Utility-first styling
+- **Framer Motion**: Smooth animations
+
+### Infrastructure
+
+- **PostgreSQL**: Primary data store
+- **Redis/RabbitMQ**: Celery broker (your existing one)
+- **Docker**: Containerized deployment
+
+## Event Flow
+
+### Task Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Celery
+    participant Broker
+    participant Kanchi
+    participant DB
+    participant Dashboard
+
+    Client->>Celery: task.delay()
+    Celery->>Broker: task-sent event
+    Broker->>Kanchi: event notification
+    Kanchi->>DB: store event
+    Kanchi->>Dashboard: WebSocket update
+
+    Celery->>Broker: task-started
+    Broker->>Kanchi: event notification
+    Kanchi->>DB: update status
+    Kanchi->>Dashboard: status change
+
+    Celery->>Broker: task-succeeded
+    Broker->>Kanchi: event notification
+    Kanchi->>DB: final update
+    Kanchi->>Dashboard: completion
+```
+
+## Data Model
+
+### Core Entities
+
+**Task Event**
+```python
+{
+  "task_id": "uuid",
+  "name": "tasks.process_data",
+  "state": "STARTED",
+  "args": [...],
+  "kwargs": {...},
+  "worker": "worker@hostname",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "runtime": 1.23
+}
+```
+
+**Worker**
+```python
+{
+  "hostname": "worker@node-1",
+  "status": "online",
+  "active_tasks": 5,
+  "processed": 1234,
+  "load_average": [1.5, 1.3, 1.2],
+  "last_heartbeat": "2025-01-15T10:30:00Z"
+}
+```
+
+**Workflow Rule**
+```python
+{
+  "name": "Retry failed tasks",
+  "trigger": {
+    "event": "task.failed",
+    "filters": [...]
+  },
+  "actions": [
+    {"type": "retry"},
+    {"type": "webhook", "url": "..."}
+  ]
+}
+```
+
+## Scalability
+
+### Horizontal Scaling
+
+Kanchi supports horizontal scaling for high-volume deployments:
+
+- **Multiple Instances**: Deploy multiple Kanchi instances
+- **Load Balancing**: Use a load balancer for the web interface
+- **Shared Database**: All instances share PostgreSQL
+- **Event Deduplication**: Built-in to prevent duplicates
+
+### Performance Optimizations
+
+- **Event Batching**: Group database writes
+- **Connection Pooling**: Efficient database connections
+- **Caching**: Redis cache for frequently accessed data
+- **Indexing**: Optimized database indexes
+
+### Resource Requirements
+
+**Minimum** (Development):
+- 512MB RAM
+- 1 CPU core
+- 1GB disk
+
+**Recommended** (Production):
+- 2GB RAM
+- 2 CPU cores
+- 10GB disk (scales with retention period)
+
+**High Volume** (>1000 tasks/sec):
+- 4GB+ RAM
+- 4+ CPU cores
+- 50GB+ disk
+- PostgreSQL tuning
+
+## Security
+
+### Authentication
+
+- **Optional Auth**: Can run without authentication
+- **JWT Tokens**: Secure API access
+- **Role-Based Access**: Admin, viewer, operator roles
+
+### Network Security
+
+- **TLS Support**: HTTPS and WSS
+- **CORS Configuration**: Restrict origin access
+- **Rate Limiting**: Prevent abuse
+
+### Data Privacy
+
+- **Sensitive Args**: Optionally hide task arguments
+- **Data Retention**: Configurable cleanup policies
+- **Audit Logs**: Track all actions
+
+## Deployment Patterns
+
+### Single Instance
+
+Simplest deployment for small teams:
+
+```
+Kanchi → PostgreSQL → Celery Broker
+```
+
+### High Availability
+
+For production environments:
+
+```
+Load Balancer
+  ├─> Kanchi Instance 1 ─┐
+  ├─> Kanchi Instance 2 ─┤
+  └─> Kanchi Instance 3 ─┴─> PostgreSQL (Primary/Replica)
+```
+
+### Multi-Region
+
+For global deployments:
+
+```
+Region 1: Kanchi + PostgreSQL Replica (read)
+Region 2: Kanchi + PostgreSQL Primary (write)
+Region 3: Kanchi + PostgreSQL Replica (read)
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Install Kanchi
+  </Card>
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/configuration/overview"
+  >
+    Configure Kanchi
+  </Card>
+  <Card
+    title="Deployment"
+    icon="server"
+    href="/deployment/production-ready"
+  >
+    Deploy to production
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    Explore the API
+  </Card>
+</CardGroup>

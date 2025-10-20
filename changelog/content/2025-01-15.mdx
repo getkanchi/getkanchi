@@ -1,0 +1,49 @@
+---
+title: "Initial Release"
+description: "First public release of Kanchi with core monitoring features"
+date: "2025-01-15"
+version: "1.0.0"
+tags: ["Release", "Features"]
+---
+
+We're excited to announce the first public release of Kanchi, the self-hosted Celery monitoring tool built for developers.
+
+## Key Features
+
+### Real-Time Monitoring
+- WebSocket-based task updates with zero latency
+- Live worker health tracking
+- Real-time task state changes
+
+### Orphan Detection
+- Automatic detection of orphaned tasks
+- One-click retry for failed tasks
+- Detailed task history and logs
+
+### Worker Health
+- CPU and memory metrics
+- Heartbeat monitoring
+- Worker status dashboard
+
+### Multi-Environment Support
+- Separate prod/staging/dev environments
+- Wildcard pattern matching
+- Session persistence
+
+## Getting Started
+
+Install Kanchi with Docker:
+
+```bash
+docker run -d -p 8000:8000 getkanchi/kanchi
+```
+
+Then open http://localhost:8000 in your browser.
+
+## What's Next
+
+We're working on several exciting features for the next release:
+- Advanced analytics and reporting
+- Custom webhook integrations
+- Workflow automation builder
+- API for programmatic access

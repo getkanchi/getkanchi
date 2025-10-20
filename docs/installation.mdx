@@ -1,0 +1,265 @@
+---
+title: 'Installation'
+description: 'Complete guide to installing Kanchi for production use'
+---
+
+## Installation Methods
+
+Choose the installation method that best fits your infrastructure:
+
+<CardGroup cols={2}>
+  <Card title="Docker" icon="docker" href="#docker">
+    Quick and easy deployment with containers
+  </Card>
+  <Card title="Kubernetes" icon="dharmachakra" href="#kubernetes">
+    Scalable deployment with Helm charts
+  </Card>
+  <Card title="Docker Compose" icon="layer-group" href="#docker-compose">
+    Multi-service setup for development
+  </Card>
+  <Card title="From Source" icon="code" href="#from-source">
+    Build and run from source code
+  </Card>
+</CardGroup>
+
+## Docker
+
+### Basic Setup
+
+Run Kanchi with Docker:
+
+```bash
+docker run -d \
+  --name kanchi \
+  -p 8000:8000 \
+  -e CELERY_BROKER_URL=redis://your-redis:6379/0 \
+  getkanchi/kanchi:latest
+```
+
+### With PostgreSQL
+
+For production use, we recommend PostgreSQL:
+
+```bash
+docker run -d \
+  --name kanchi \
+  -p 8000:8000 \
+  -e CELERY_BROKER_URL=redis://your-redis:6379/0 \
+  -e DATABASE_URL=postgresql://user:pass@postgres:5432/kanchi \
+  getkanchi/kanchi:latest
+```
+
+## Docker Compose
+
+Create a `docker-compose.yml` file:
+
+```yaml
+version: '3.8'
+
+services:
+  kanchi:
+    image: getkanchi/kanchi:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://kanchi:kanchi@postgres:5432/kanchi
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=kanchi
+      - POSTGRES_PASSWORD=kanchi
+      - POSTGRES_DB=kanchi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kanchi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+Start the services:
+
+```bash
+docker-compose up -d
+```
+
+## Kubernetes
+
+### Using Helm
+
+Add the Kanchi Helm repository:
+
+```bash
+helm repo add kanchi https://charts.getkanchi.com
+helm repo update
+```
+
+Install Kanchi:
+
+```bash
+helm install kanchi kanchi/kanchi \
+  --set celery.brokerUrl="redis://redis:6379/0" \
+  --set postgresql.enabled=true \
+  --namespace monitoring \
+  --create-namespace
+```
+
+### Manual Deployment
+
+Download the Kubernetes manifests:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/getkanchi/kanchi/main/k8s/
+```
+
+## From Source
+
+### Prerequisites
+
+- Python 3.11+
+- Poetry
+- Node.js 18+
+- PostgreSQL (optional, for production)
+
+### Clone and Install
+
+```bash
+# Clone the repository
+git clone https://github.com/getkanchi/kanchi.git
+cd kanchi
+
+# Install backend dependencies
+poetry install
+
+# Install frontend dependencies
+cd frontend
+npm install
+cd ..
+
+# Run migrations
+poetry run alembic upgrade head
+
+# Start the development server
+poetry run uvicorn kanchi.main:app --reload
+```
+
+## Environment Configuration
+
+### Required Variables
+
+```bash
+# Celery Broker
+CELERY_BROKER_URL=redis://localhost:6379/0
+
+# Database (optional, defaults to SQLite)
+DATABASE_URL=postgresql://user:pass@localhost:5432/kanchi
+
+# Secret key for session management
+SECRET_KEY=your-secret-key-here
+```
+
+### Optional Variables
+
+```bash
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+
+# Logging
+LOG_LEVEL=INFO
+
+# Celery Configuration
+CELERY_RESULT_BACKEND=redis://localhost:6379/1
+CELERY_TASK_ALWAYS_EAGER=False
+
+# WebSocket Configuration
+WS_HEARTBEAT_INTERVAL=30
+WS_MESSAGE_SIZE_LIMIT=10485760
+```
+
+<Card
+  title="Configuration Guide"
+  icon="gear"
+  href="/configuration/overview"
+>
+  See all configuration options
+</Card>
+
+## Verify Installation
+
+After installation, verify that Kanchi is running:
+
+1. Open [http://localhost:8000](http://localhost:8000)
+2. Check that the dashboard loads
+3. Send a test task from your Celery application
+4. Verify the task appears in the dashboard
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Cannot connect to broker">
+    Verify your `CELERY_BROKER_URL` is correct and the broker is accessible from the Kanchi container.
+
+    ```bash
+    docker logs kanchi
+    ```
+  </Accordion>
+
+  <Accordion title="Database connection failed">
+    Check your `DATABASE_URL` and ensure PostgreSQL is running and accessible.
+
+    ```bash
+    docker-compose logs postgres
+    ```
+  </Accordion>
+
+  <Accordion title="No tasks appearing">
+    Ensure your Celery workers are configured to send events:
+
+    ```python
+    app = Celery('tasks', broker='redis://localhost')
+    app.conf.worker_send_task_events = True
+    app.conf.task_send_sent_event = True
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Quickstart"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get started with basic usage
+  </Card>
+  <Card
+    title="Production Deployment"
+    icon="server"
+    href="/deployment/production-ready"
+  >
+    Deploy to production
+  </Card>
+</CardGroup>

@@ -1,0 +1,149 @@
+---
+title: 'Quickstart'
+description: 'Get Kanchi running in under 5 minutes'
+---
+
+## Prerequisites
+
+Before you begin, make sure you have:
+- Docker installed on your machine
+- A running Celery application with Redis or RabbitMQ broker
+- Access to your Celery broker URL
+
+## Installation
+
+### Docker (Recommended)
+
+The fastest way to get started with Kanchi is using Docker:
+
+```bash
+docker run -d \
+  -p 8000:8000 \
+  -e CELERY_BROKER_URL=redis://localhost:6379/0 \
+  getkanchi/kanchi
+```
+
+<Tip>
+Replace `redis://localhost:6379/0` with your actual Celery broker URL
+</Tip>
+
+### Docker Compose
+
+For a more persistent setup, create a `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  kanchi:
+    image: getkanchi/kanchi:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://kanchi:password@postgres:5432/kanchi
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=kanchi
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=kanchi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+Start the services:
+
+```bash
+docker-compose up -d
+```
+
+## First Steps
+
+### 1. Access the Dashboard
+
+Open your browser and navigate to [http://localhost:8000](http://localhost:8000)
+
+### 2. Verify Connection
+
+You should see the Kanchi dashboard. The system will automatically:
+- Connect to your Celery broker
+- Start receiving task events
+- Display active workers
+
+### 3. Send a Test Task
+
+From your Celery application, send a test task:
+
+```python
+from tasks import my_task
+
+result = my_task.delay(arg1, arg2)
+```
+
+You should see the task appear in the Kanchi dashboard immediately.
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CELERY_BROKER_URL` | Your Celery broker URL | `redis://localhost:6379/0` |
+| `DATABASE_URL` | PostgreSQL connection string | SQLite (dev only) |
+| `PORT` | Port for the web server | `8000` |
+| `LOG_LEVEL` | Logging level | `INFO` |
+
+<Card
+  title="Full Configuration"
+  icon="gear"
+  href="/configuration/overview"
+>
+  View all configuration options
+</Card>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Core Concepts"
+    icon="book-open"
+    href="/core/architecture"
+  >
+    Learn about Kanchi's architecture
+  </Card>
+  <Card
+    title="Workflow Automation"
+    icon="bolt"
+    href="/core/workflow-automation"
+  >
+    Set up automated actions
+  </Card>
+  <Card
+    title="Production Deployment"
+    icon="server"
+    href="/deployment/production-ready"
+  >
+    Deploy to production
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    Explore the API
+  </Card>
+</CardGroup>

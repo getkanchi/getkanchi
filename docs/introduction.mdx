@@ -1,0 +1,90 @@
+---
+title: Introduction
+description: 'Real-time Celery task monitoring with automatic orphan detection and workflow automation'
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.png"
+  alt="Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.png"
+  alt="Hero Dark"
+/>
+
+## What is Kanchi?
+
+Kanchi is a production-ready monitoring system for Celery distributed task queues. It provides real-time visibility into task execution, automatic detection and recovery of orphaned tasks, worker health monitoring, and event-driven workflow automation—all through a modern web interface with WebSocket-powered live updates.
+
+## The Problem
+
+Celery provides minimal built-in monitoring, making it difficult to:
+- Debug failures and track task lifecycle
+- Detect orphaned tasks when workers crash
+- Automate recovery workflows
+- Get real-time visibility into your task queue
+
+## The Solution
+
+Kanchi captures all Celery events and provides:
+- **Real-time dashboard** with full task history
+- **Automatic orphan detection** with one-click retry
+- **Workflow automation** without code changes
+- **Worker health monitoring** with system metrics
+- **Advanced analytics** and trend analysis
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card
+    title="Real-Time Monitoring"
+    icon="activity"
+    href="/features/real-time-monitoring"
+  >
+    WebSocket-powered live updates showing task execution as it happens
+  </Card>
+  <Card
+    title="Orphan Detection"
+    icon="triangle-exclamation"
+    href="/core/orphan-detection"
+  >
+    Automatically identifies and recovers tasks from crashed workers
+  </Card>
+  <Card
+    title="Workflow Automation"
+    icon="bolt"
+    href="/core/workflow-automation"
+  >
+    Event-driven actions without writing code
+  </Card>
+  <Card
+    title="Worker Health"
+    icon="heart-pulse"
+    href="/core/worker-health"
+  >
+    Real-time status tracking with system metrics
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+Get Kanchi running in under 5 minutes:
+
+```bash
+docker run -d \
+  -p 8000:8000 \
+  -e CELERY_BROKER_URL=redis://localhost \
+  getkanchi/kanchi
+```
+
+Open [http://localhost:8000](http://localhost:8000) to access the dashboard.
+
+<Card
+  title="Installation Guide"
+  icon="book"
+  href="/installation"
+>
+  View the complete installation guide for production deployments
+</Card>

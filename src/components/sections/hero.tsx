@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Terminal as TerminalIcon, Github, ArrowRight, Activity } from "lucide-react";
 import { ShimmerButton } from "@/components/magicui/shimmer-button";
 import {
@@ -10,10 +9,7 @@ import {
 } from "@/components/ui/terminal";
 import { DotPatternWithGlowEffect} from "@/components/common/animated-dot-pattern";
 import NumberTicker from "@/components/magicui/number-ticker";
-import { Button } from "@/components/ui/button";
-import OrbitingCircles from "@/components/magicui/orbiting-circles";
 import {BlurFade} from "@/components/ui/blur-fade";
-import {TextAnimate} from "@/components/ui/text-animate";
 
 export function HeroSection() {
 
@@ -28,14 +24,10 @@ export function HeroSection() {
           <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight">
                   <BlurFade duration={0.6}>
-                    <TextAnimate animate={'blurIn'} by={'character'} duration={0.4}>
                       Monitor Celery.
-                    </TextAnimate>
                   </BlurFade>
                   <BlurFade delay={0.5} duration={0.6}>
-                    <TextAnimate animate={'blurIn'} by={'character'} duration={0.4}>
                      In Real-Time.
-                    </TextAnimate>
                   </BlurFade>
               </h1>
               <BlurFade direction={'right'} delay={2*0.5}>

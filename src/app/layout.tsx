@@ -63,9 +63,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark overflow-x-hidden">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} ${archivo.variable} font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)]`}
+        className={`${inter.variable} ${jetbrainsMono.variable} ${archivo.variable} font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)] overflow-x-hidden`}
       >
         <Header />
         {children}

@@ -18,10 +18,10 @@ import {TextAnimate} from "@/components/ui/text-animate";
 export function HeroSection() {
 
   return (
-    <section className="relative min-h-screen">
+    <section className="relative min-h-screen overflow-hidden">
       <DotPatternWithGlowEffect />
 
-      <div className="flex items-center justify-center min-h-screen overflow-hidden border-border">
+      <div className="flex items-center justify-center min-h-screen border-border">
         <div className="container relative z-10 mx-auto px-4 py-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Content */}
@@ -97,7 +97,7 @@ export function HeroSection() {
           </div>
 
             <BlurFade delay={5*0.5} direction={"right"} duration={0.6}>
-            <div>
+            <div className="hidden md:block">
             <Terminal className="bg-surface border-border">
               <TypingAnimation delay={0} className="text-muted">
                 $ docker run -d -p 8000:8000 getkanchi/kanchi

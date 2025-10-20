@@ -1,0 +1,90 @@
+---
+title: "Kanchi 1.0: Ship with confidence"
+description: "Real-time Celery monitoring that doesn't make you want to quit"
+date: "2025-01-20"
+version: "1.0.0"
+tags: ["Release", "Initial"]
+---
+
+Today we're releasing Kanchi—a monitoring system for Celery that actually feels good to use. If you've spent years squinting at logs or refreshing Flower tabs, this one's for you.
+
+## Why we built this
+
+Distributed task queues are critical infrastructure, but most observability tools haven't kept up. We wanted something that feels fun to use while providing deep insights into task execution.
+
+Kanchi connects directly to your message broker (no agents, no SDK changes) and gives you real-time visibility into what's actually happening. Tasks, workers, retries, failures—everything you need to debug issues and prevent outages.
+
+## What you get
+
+### Live task monitoring
+WebSocket-based updates mean you see tasks as they flow through your system. No refresh button, no polling lag. Switch between streaming mode for active debugging and paginated views for historical analysis.
+
+Each task shows the full context: arguments, results, execution time, and stack traces. If a task retries, you'll see the entire chain with parent-child relationships mapped out.
+
+### Search and filter that actually works
+Date range picker with calendar support. Filter by status, task name, worker, queue—or combine them all. Full-text search across task arguments and results. The interface updates in real time as you refine queries.
+
+### Worker health at a glance
+Live worker status with heartbeat tracking. See which workers are handling the most load, which ones are idle, and which ones disappeared mid-task. The dashboard updates as workers join or leave the pool.
+
+### Task registry
+Browse every registered Celery task in your application. Multi-environment support means you can monitor prod, staging, and dev separately without mixing state.
+
+### Orphan detection
+When tasks fail because a worker crashed or the network dropped, Kanchi flags them automatically. Bulk retry with batch tracking so you can recover gracefully instead of scrambling through logs.
+
+### Persistence without the pain
+SQLite by default, PostgreSQL for production. Task history with full state transitions, daily statistics, trend analysis. Auto-migrations with Alembic—zero manual schema work.
+
+<Accordion type="multiple" collapsible className="w-full not-prose">
+  <AccordionItem value="technical">
+    <AccordionTrigger>Technical stack</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <p><strong>Backend</strong></p>
+      <ul className="list-disc space-y-2 pl-4">
+        <li>FastAPI for REST and WebSocket APIs</li>
+        <li>Celery event monitoring via message broker</li>
+        <li>SQLAlchemy with async support</li>
+        <li>Pydantic for type-safe data models</li>
+      </ul>
+      <p><strong>Frontend</strong></p>
+      <ul className="list-disc space-y-2 pl-4">
+        <li>Next.js 15 with App Router and TypeScript</li>
+        <li>Tailwind CSS v4 + Radix UI components</li>
+        <li>TanStack Table for high-performance grids</li>
+        <li>Auto-generated TypeScript types from OpenAPI schema</li>
+      </ul>
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="quickstart">
+    <AccordionTrigger>Quick start</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <p><strong>Docker (fastest)</strong></p>
+      <pre><code>docker build -t kanchi .
+docker run -p 8765:8765 -p 3000:3000 \
+  -e RABBITMQ_URL=amqp://guest:guest@localhost:5672// \
+  kanchi</code></pre>
+      <p><strong>Local development</strong></p>
+      <pre><code># Requires Python 3.8+, Poetry, Node.js 20+
+make dev</code></pre>
+      <p>Open <code>http://localhost:3000</code> and you're done.</p>
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="roadmap">
+    <AccordionTrigger>What's next</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <p>We're working on workflow automation features that let you define event-driven actions without writing code:</p>
+      <ul className="list-disc space-y-2 pl-4">
+        <li>Webhook integrations for external systems</li>
+        <li>Custom retry policies and escalation rules</li>
+        <li>Automated notifications and alerts</li>
+        <li>Task chaining and conditional execution</li>
+      </ul>
+      <p>The infrastructure is already in place—we're refining the UI to make it intuitive and powerful.</p>
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+---
+
+Built for developers who need intuitive visibility into distributed systems. Try it out and let us know what breaks 😅.

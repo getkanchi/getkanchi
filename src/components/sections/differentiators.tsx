@@ -109,11 +109,11 @@ export function DifferentiatorsSection() {
                       <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]" />
                       <div className="h-2.5 w-2.5 rounded-full bg-[#27C93F]" />
                     </div>
-                    <span className="font-mono text-xs text-muted-foreground ml-2">
+                    <span className="font-mono text-xs text-muted-foreground ml-2 truncate">
                       docker-compose.yml
                     </span>
                   </div>
-                  <div className="p-4 font-mono text-xs space-y-1 overflow-x-auto">
+                  <div className="p-4 font-mono text-xs space-y-1 overflow-x-auto max-w-full">
                     <div className="flex gap-4">
                       <span className="text-muted-foreground select-none">1</span>
                       <span className="text-special">services:</span>

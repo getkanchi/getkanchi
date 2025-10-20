@@ -68,6 +68,10 @@
    Add them to @theme so you can use: bg-success, text-error, etc.
    ============================================================================= */
 @theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+
   --color-success: hsl(158 64% 52%);
   --color-error: hsl(347 77% 60%);
   --color-warning: hsl(45 85% 65%);

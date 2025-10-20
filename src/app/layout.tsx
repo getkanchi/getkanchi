@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import { JetBrains_Mono } from "next/font/google";
 import { Archivo } from "next/font/google";
 import { Header } from "@/components/sections/header";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
@@ -65,7 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark overflow-x-hidden">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} ${archivo.variable} font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)] overflow-x-hidden`}
+        className={`${GeistSans.variable} ${jetbrainsMono.variable} ${archivo.variable} font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)] overflow-x-hidden`}
       >
         <Header />
         {children}

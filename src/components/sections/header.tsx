@@ -27,14 +27,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-12 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-display font-bold text-xl">
-          <img src="/logo_kanchi.svg" alt="Kanchi Logo" className="h-8 w-8" /> Kanchi
+          <img src="/logo_kanchi.svg" alt="Kanchi Logo" className="h-5 w-5" /> Kanchi
         </Link>
 
         {/* Desktop Navigation */}
-        <NavigationMenu className="hidden md:flex text-muted">
+        <NavigationMenu className="hidden md:flex text-muted h-full">
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>

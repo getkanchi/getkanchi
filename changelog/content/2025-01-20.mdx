@@ -60,13 +60,17 @@ SQLite by default, PostgreSQL for production. Task history with full state trans
     <AccordionTrigger>Quick start</AccordionTrigger>
     <AccordionContent className="flex flex-col gap-4 text-balance">
       <p><strong>Docker (fastest)</strong></p>
-      <pre><code>docker build -t kanchi .
-docker run -p 8765:8765 -p 3000:3000 \
-  -e RABBITMQ_URL=amqp://guest:guest@localhost:5672// \
-  kanchi</code></pre>
+      ```bash
+      docker build -t kanchi .
+      docker run -p 8765:8765 -p 3000:3000 \
+        -e RABBITMQ_URL=amqp://guest:guest@localhost:5672// \
+        kanchi
+      ```
       <p><strong>Local development</strong></p>
-      <pre><code># Requires Python 3.8+, Poetry, Node.js 20+
-make dev</code></pre>
+      ```bash
+      # Requires Python 3.8+, Poetry, Node.js 20+
+      make dev
+      ```
       <p>Open <code>http://localhost:3000</code> and you're done.</p>
     </AccordionContent>
   </AccordionItem>

@@ -7,7 +7,7 @@ import {
   Terminal,
   TypingAnimation,
 } from "@/components/ui/terminal";
-import { DotPatternWithGlowEffect} from "@/components/common/animated-dot-pattern";
+import { DotPatternWithGlowEffect } from "@/components/common/animated-dot-pattern";
 import NumberTicker from "@/components/magicui/number-ticker";
 import {BlurFade} from "@/components/ui/blur-fade";
 

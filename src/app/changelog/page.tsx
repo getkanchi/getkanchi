@@ -37,9 +37,10 @@ export default function ChangelogPage() {
             const MDX = (changelog as any).body;
             const date = new Date(changelog.date || (changelog as any).title);
             const formattedDate = formatDate(date);
+            const anchorId = changelog.version || `changelog-${index}`;
 
             return (
-              <div key={index} className="relative">
+              <div key={index} id={anchorId} className="relative scroll-mt-24">
                 <div className="flex flex-col md:flex-row gap-y-6">
                   {/* Left side - Date and Version */}
                   <div className="md:w-48 flex-shrink-0">
@@ -49,9 +50,12 @@ export default function ChangelogPage() {
                       </time>
 
                       {changelog.version && (
-                        <div className="inline-flex relative z-10 items-center justify-center w-10 h-10 text-foreground border border-muted rounded-lg text-sm px-6 font-bold">
+                        <a
+                          href={`#${anchorId}`}
+                          className="inline-flex relative z-10 items-center justify-center w-10 h-10 text-foreground border border-muted rounded-lg text-sm px-6 font-bold hover:border-foreground/50 transition-colors"
+                        >
                           {changelog.version}
-                        </div>
+                        </a>
                       )}
                     </div>
                   </div>

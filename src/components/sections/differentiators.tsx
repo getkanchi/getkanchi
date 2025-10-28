@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, CheckCircle2, Code2 } from "lucide-react";
+import { Check, CheckCircle2, Code2, Cloud } from "lucide-react";
 import NumberTicker from "@/components/magicui/number-ticker";
 
 const differentiators = [
@@ -145,13 +145,15 @@ export function DifferentiatorsSection() {
               {/* Stats Cards */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-6 rounded-lg border border-border bg-card/30 backdrop-blur-sm">
-                  <div className="text-4xl font-bold font-mono text-primary mb-2">
-                    <NumberTicker value={1000} />
-                    <span className="text-2xl text-muted">+</span>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Cloud className="w-5 h-5 text-primary" />
                   </div>
-                  <div className="text-sm text-muted">Tasks/sec</div>
+                  <div className="text-2xl font-bold font-mono text-primary mb-2">
+                    t3.nano
+                  </div>
+                  <div className="text-sm text-muted">AWS Ready</div>
                   <div className="text-xs text-muted-foreground font-mono mt-1">
-                    @ 1GB RAM
+                    0.5GB RAM
                   </div>
                 </div>
 

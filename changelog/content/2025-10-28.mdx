@@ -1,0 +1,80 @@
+---
+title: "Redis broker support"
+description: "Choose the message broker that fits your stack"
+date: "2025-10-28"
+version: "1.2.0"
+tags: ["Feature", "Configuration"]
+---
+
+Kanchi now supports Redis as an alternative message broker. If you're already running Redis or prefer it over RabbitMQ, you can use it directly—no changes to your Celery configuration needed.
+
+## Why this matters
+
+Some teams already have Redis in their infrastructure and don't want to add RabbitMQ just for Celery. Others prefer Redis for its simplicity or operational familiarity. Now you can choose.
+
+Both brokers work identically from Kanchi's perspective. Pick whichever fits your stack.
+
+## Configuration
+
+We've standardized on a single environment variable that works with any Celery-compatible broker:
+
+**For RabbitMQ:**
+```bash
+CELERY_BROKER_URL=amqp://user:password@localhost:5672//
+```
+
+**For Redis:**
+```bash
+CELERY_BROKER_URL=redis://localhost:6379/0
+```
+
+That's it. Set the variable, restart Kanchi, and it connects to your broker automatically.
+
+## Breaking change
+
+If you're upgrading from v1.1.0 or earlier, the environment variable name has changed:
+
+**Old:** `RABBITMQ_URL`
+**New:** `CELERY_BROKER_URL`
+
+The new name reflects that Kanchi supports multiple broker types. Your existing RabbitMQ connection will work—just rename the environment variable.
+
+<Accordion type="single" collapsible className="w-full not-prose">
+  <AccordionItem value="migration">
+    <AccordionTrigger>Migration guide</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <p><strong>Docker Compose users</strong></p>
+      <p>Update your <code>docker-compose.yaml</code> file:</p>
+      ```yaml
+      environment:
+        # Old
+        - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+
+        # New
+        - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+        # Or switch to Redis
+        - CELERY_BROKER_URL=redis://redis:6379/0
+      ```
+      <p>Then restart:</p>
+      ```bash
+      docker compose down
+      docker compose up -d --build --pull always
+      ```
+
+      <p><strong>Local development</strong></p>
+      <p>Update your <code>.env</code> file or export the new variable:</p>
+      ```bash
+      export CELERY_BROKER_URL=amqp://guest:guest@localhost:5672//
+      # Or use Redis
+      export CELERY_BROKER_URL=redis://localhost:6379/0
+      ```
+
+      <p><strong>Switching from RabbitMQ to Redis</strong></p>
+      <p>If you want to switch brokers, you'll also need to update your Celery workers to use the same Redis URL. Kanchi reads events from the broker - your Celery application must be configured to publish to the same broker for monitoring to work.</p>
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+---
+
+That's the update. Broker flexibility without the complexity. If you hit any issues, open an issue on GitHub - we are always happy to help. Happy monitoring!

@@ -1,0 +1,21 @@
+---
+title: "Database migration fix"
+description: "Ensuring smooth upgrades for everyone"
+date: "2025-10-29"
+version: "1.2.1"
+tags: ["Bug Fix", "Database"]
+---
+
+If you upgraded to v1.2.0 and ran into database migration issues, this patch fixes that.
+
+## What was broken
+
+The workflow circuit breaker migration wasn't properly sequenced with earlier migrations. In some deployment scenarios, this could cause the migration to run out of order or fail entirely.
+
+## What's fixed
+
+Migrations now run in the correct sequence. If you experienced issues upgrading to v1.2.0, pull the latest version and the database will migrate cleanly.
+
+---
+
+Standard upgrade process applies—pull the update and restart. Database migrations run automatically on startup.

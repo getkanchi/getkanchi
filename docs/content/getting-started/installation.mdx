@@ -1,0 +1,458 @@
+---
+title: Installation
+description: Deploy Kanchi for production with Docker, or run it locally for development.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Accordions, Accordion } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+Kanchi runs wherever Docker runs. For production, point it at PostgreSQL. For development, SQLite works great.
+
+<Callout>
+Kanchi doesn't manage your message broker or database infrastructure. You bring RabbitMQ or Redis, and optionally PostgreSQL. We handle the monitoring.
+</Callout>
+
+## Installation methods
+
+<Cards className="mt-6">
+  <Card href="#docker-compose" title="Docker Compose" description="Production deployment modeled after Docmost — simple and reliable." />
+  <Card href="#local-development" title="Local Development" description="Run from source for development and contributions." />
+  <Card href="#docker-only" title="Docker Only" description="Single-container deployment for minimal setups." />
+</Cards>
+
+## Docker Compose
+
+The recommended deployment method. Download one file, configure your broker, run one command.
+
+<Steps>
+  <Step>
+    **Download the Docker Compose file**
+
+    ```bash
+    curl -O https://raw.githubusercontent.com/getkanchi/kanchi/main/docker-compose.yaml
+    ```
+
+    Or create `docker-compose.yaml` yourself:
+
+    <Tabs items={['With PostgreSQL', 'Bring Your Own']}>
+      <Tab value="postgres">
+        ```yaml
+        version: '3.8'
+
+        services:
+          kanchi:
+            image: ghcr.io/getkanchi/kanchi:latest
+            ports:
+              - "3000:3000"  # Frontend
+              - "8765:8765"  # Backend API
+            environment:
+              # Required: your broker
+              - CELERY_BROKER_URL=amqp://user:pass@your-rabbit:5672//
+              # Or: CELERY_BROKER_URL=redis://your-redis:6379/0
+
+              # Database (PostgreSQL recommended for production)
+              - DATABASE_URL=postgresql+asyncpg://kanchi:kanchi@postgres:5432/kanchi
+
+              # Secrets (generate with: openssl rand -hex 32)
+              - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
+              - TOKEN_SECRET_KEY=${TOKEN_SECRET_KEY}
+
+              # Frontend URLs
+              - NUXT_PUBLIC_API_URL=http://localhost:8765
+              - NUXT_PUBLIC_WS_URL=ws://localhost:8765/ws
+
+              # Optional: Authentication (disabled by default)
+              - AUTH_ENABLED=false
+            depends_on:
+              postgres:
+                condition: service_healthy
+            restart: unless-stopped
+
+          postgres:
+            image: postgres:15-alpine
+            environment:
+              - POSTGRES_USER=kanchi
+              - POSTGRES_PASSWORD=kanchi
+              - POSTGRES_DB=kanchi
+            volumes:
+              - postgres_data:/var/lib/postgresql/data
+            healthcheck:
+              test: ["CMD-SHELL", "pg_isready -U kanchi"]
+              interval: 5s
+              timeout: 5s
+              retries: 5
+            restart: unless-stopped
+
+        volumes:
+          postgres_data:
+        ```
+      </Tab>
+      <Tab value="byo">
+        ```yaml
+        version: '3.8'
+
+        services:
+          kanchi:
+            image: ghcr.io/getkanchi/kanchi:latest
+            ports:
+              - "3000:3000"
+              - "8765:8765"
+            environment:
+              # Point to your existing broker and database
+              - CELERY_BROKER_URL=amqp://user:pass@your-rabbit-host:5672//
+              - DATABASE_URL=postgresql+asyncpg://user:pass@your-postgres-host:5432/kanchi
+
+              # Secrets
+              - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
+              - TOKEN_SECRET_KEY=${TOKEN_SECRET_KEY}
+
+              # Frontend URLs (adjust to your domain)
+              - NUXT_PUBLIC_API_URL=https://your-domain.com
+              - NUXT_PUBLIC_WS_URL=wss://your-domain.com/ws
+
+              # CORS (if frontend is on different domain)
+              - ALLOWED_ORIGINS=https://your-domain.com
+            restart: unless-stopped
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    **Configure secrets**
+
+    Generate random secrets for session management:
+
+    ```bash
+    export SESSION_SECRET_KEY=$(openssl rand -hex 32)
+    export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+    ```
+
+    Or add them to a `.env` file:
+
+    ```bash
+    echo "SESSION_SECRET_KEY=$(openssl rand -hex 32)" >> .env
+    echo "TOKEN_SECRET_KEY=$(openssl rand -hex 32)" >> .env
+    ```
+  </Step>
+
+  <Step>
+    **Start Kanchi**
+
+    ```bash
+    docker compose up -d --build
+    ```
+
+    The same command handles both initial deployment and updates:
+
+    ```bash
+    # Pull latest, rebuild, and restart
+    docker compose up -d --build --pull always --force-recreate
+    ```
+  </Step>
+
+  <Step>
+    **Access the dashboard**
+
+    Open [http://localhost:3000](http://localhost:3000)
+
+    Backend API documentation: [http://localhost:8765/docs](http://localhost:8765/docs)
+  </Step>
+</Steps>
+
+<Callout>
+Database migrations run automatically on startup. No manual Alembic commands needed.
+</Callout>
+
+## Local Development
+
+Run Kanchi from source for development or contributions.
+
+<Steps>
+  <Step>
+    **Install prerequisites**
+
+    - Python 3.8+ with [Poetry](https://python-poetry.org/docs/#installation)
+    - Node.js 20+ with npm
+    - A running message broker (RabbitMQ or Redis)
+
+    ```bash
+    # macOS with Homebrew
+    brew install python poetry node rabbitmq
+
+    # Start RabbitMQ
+    brew services start rabbitmq
+    ```
+  </Step>
+
+  <Step>
+    **Clone and install dependencies**
+
+    ```bash
+    git clone https://github.com/getkanchi/kanchi.git
+    cd kanchi
+
+    # Backend dependencies
+    cd agent
+    poetry install
+
+    # Frontend dependencies
+    cd ../frontend
+    npm install
+    ```
+  </Step>
+
+  <Step>
+    **Configure environment**
+
+    From the project root, create a `.env` file or export variables:
+
+    ```bash
+    # Required: broker connection
+    export CELERY_BROKER_URL=amqp://guest:guest@localhost:5672//
+
+    # Optional: database (defaults to SQLite in project directory)
+    export DATABASE_URL=sqlite:///kanchi.db
+
+    # Optional: API URLs for frontend
+    export NUXT_PUBLIC_API_URL=http://localhost:8765
+    export NUXT_PUBLIC_WS_URL=ws://localhost:8765/ws
+
+    # Optional: development mode (enables debug logging)
+    export DEVELOPMENT_MODE=true
+    export LOG_LEVEL=DEBUG
+    ```
+  </Step>
+
+  <Step>
+    **Start the application**
+
+    From the project root:
+
+    ```bash
+    make dev
+    ```
+
+    This starts:
+    - Backend API on [http://localhost:8765](http://localhost:8765)
+    - Frontend on [http://localhost:3000](http://localhost:3000)
+    - Unified log output
+
+    Or run separately:
+
+    ```bash
+    # Terminal 1: Backend
+    cd agent
+    poetry run python app.py
+
+    # Terminal 2: Frontend
+    cd frontend
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+### Development commands
+
+```bash
+# View unified logs
+make logs
+
+# Seed database with demo data
+make seed
+
+# Backend only
+make backend
+
+# Frontend only
+make frontend
+
+# Format backend code
+cd agent && poetry run black .
+
+# Lint backend code
+cd agent && poetry run ruff check .
+
+# Type-safe API client generation (from backend OpenAPI schema)
+cd frontend && npm run generate:api
+```
+
+## Docker Only
+
+Single-container deployment for minimal setups. Requires an external broker and database.
+
+```bash
+docker run -d \
+  --name kanchi \
+  -p 3000:3000 \
+  -p 8765:8765 \
+  -e CELERY_BROKER_URL=amqp://user:pass@rabbit-host:5672// \
+  -e DATABASE_URL=postgresql+asyncpg://user:pass@pg-host:5432/kanchi \
+  -e SESSION_SECRET_KEY=$(openssl rand -hex 32) \
+  -e NUXT_PUBLIC_API_URL=http://localhost:8765 \
+  -e NUXT_PUBLIC_WS_URL=ws://localhost:8765/ws \
+  ghcr.io/getkanchi/kanchi:latest
+```
+
+For SQLite (development only):
+
+```bash
+docker run -d \
+  --name kanchi \
+  -p 3000:3000 \
+  -p 8765:8765 \
+  -v $(pwd)/kanchi.db:/app/kanchi.db \
+  -e CELERY_BROKER_URL=redis://redis-host:6379/0 \
+  -e DATABASE_URL=sqlite:///kanchi.db \
+  ghcr.io/getkanchi/kanchi:latest
+```
+
+## Verify installation
+
+After deploying Kanchi:
+
+<Steps>
+  <Step>
+    **Check backend health**
+
+    ```bash
+    curl http://localhost:8765/api/health
+    ```
+
+    You should get a `200 OK` response.
+  </Step>
+
+  <Step>
+    **View logs**
+
+    <Tabs items={['Docker Compose', 'Docker', 'Local']}>
+      <Tab value="compose">
+        ```bash
+        docker compose logs -f kanchi
+        ```
+      </Tab>
+      <Tab value="docker">
+        ```bash
+        docker logs -f kanchi
+        ```
+      </Tab>
+      <Tab value="local">
+        ```bash
+        tail -f kanchi.log
+        ```
+      </Tab>
+    </Tabs>
+
+    Look for: `Connected to broker` in the logs.
+  </Step>
+
+  <Step>
+    **Run a test task**
+
+    Execute a task from your Celery application. It should appear in the Kanchi dashboard within seconds.
+
+    If tasks don't appear, ensure your Celery workers have events enabled:
+
+    ```python
+    # In your Celery config
+    worker_send_task_events = True
+    task_send_sent_event = True
+    ```
+
+    Or start workers with the `-E` flag:
+
+    ```bash
+    celery -A your_app worker -E
+    ```
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordions type="single" collapsible>
+  <Accordion title="Connection refused errors" value="connection">
+    **Check broker accessibility**: Ensure your message broker is running and accessible.
+
+    For Docker deployments, use the broker's container name or IP address, not `localhost`.
+
+    **Test connectivity**:
+
+    <Tabs items={['RabbitMQ', 'Redis']}>
+      <Tab value="rabbitmq">
+        ```bash
+        telnet your-rabbit-host 5672
+        ```
+      </Tab>
+      <Tab value="redis">
+        ```bash
+        redis-cli -h your-redis-host ping
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+
+  <Accordion title="Database migration errors" value="migrations">
+    Migrations run automatically on startup, but if you encounter issues:
+
+    ```bash
+    # Check migration status
+    cd agent
+    poetry run alembic current
+
+    # Apply migrations manually
+    poetry run alembic upgrade head
+    ```
+
+    For PostgreSQL connection issues, verify `DATABASE_URL` format:
+
+    ```bash
+    # Correct format (note the +asyncpg driver)
+    postgresql+asyncpg://user:password@host:5432/database
+    ```
+  </Accordion>
+
+  <Accordion title="Frontend can't connect to backend" value="cors">
+    **Check API URLs**: Verify environment variables:
+
+    ```bash
+    NUXT_PUBLIC_API_URL=http://localhost:8765
+    NUXT_PUBLIC_WS_URL=ws://localhost:8765/ws
+    ```
+
+    **CORS issues**: If running backend and frontend on different hosts:
+
+    ```bash
+    export ALLOWED_ORIGINS=http://localhost:3000,https://your-domain.com
+    export ALLOWED_HOSTS=localhost,your-domain.com
+    ```
+  </Accordion>
+
+  <Accordion title="Tasks not appearing" value="no-tasks">
+    **Verify same broker**: Kanchi and your Celery workers must connect to the **same broker instance**.
+
+    **Enable events**: Celery workers must broadcast events:
+
+    ```python
+    # Option 1: In your Celery config
+    app.conf.worker_send_task_events = True
+    app.conf.task_send_sent_event = True
+
+    # Option 2: Start worker with -E flag
+    # celery -A your_app worker -E
+    ```
+
+    **Check worker logs**: Verify workers are connected and processing tasks.
+  </Accordion>
+</Accordions>
+
+## Next steps
+
+<Cards className="mt-6">
+  <Card href="/docs/getting-started/quickstart" title="Quickstart" description="Learn the basics with a 5-minute tutorial." />
+  <Card href="/docs/configuration/environment" title="Configuration" description="Explore all environment variables and options." />
+  <Card href="/docs/deployment/production" title="Production Deployment" description="Best practices for production deployments." />
+  <Card href="/docs/configuration/authentication" title="Authentication" description="Secure your Kanchi instance with authentication." />
+</Cards>

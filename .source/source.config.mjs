@@ -13,6 +13,9 @@ var { docs, meta } = defineDocs({
     })
   }
 });
+var { docs: docsDocs, meta: docsMeta } = defineDocs({
+  dir: "docs/content"
+});
 var source_config_default = defineConfig({
   lastModifiedTime: "git",
   mdxOptions: {
@@ -22,5 +25,7 @@ var source_config_default = defineConfig({
 export {
   source_config_default as default,
   docs,
+  docsDocs,
+  docsMeta,
   meta
 };

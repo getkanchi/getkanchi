@@ -13,7 +13,7 @@ We've been shipping fast since v1.0.0. This release brings intelligent automatio
 The headline feature: automated response to task failures. If you've ever manually retried a batch of failed tasks at 2am or wished Slack would just tell you when things break, this is for you.
 
 ### Event-driven automation
-Create workflows that trigger on specific conditions—task failures, orphan detection, execution time thresholds. Each workflow runs independently with full execution history and rollback support.
+Create workflows that trigger on specific conditions — task failures, orphan detection, execution time thresholds. Each workflow runs independently with full execution history and rollback support.
 
 ### Circuit breaker protection
 Workflows include configurable circuit breakers to prevent infinite retry loops. Set thresholds for execution count and time windows. When limits are hit, the circuit opens and notifications are sent instead of blindly retrying tasks into oblivion.
@@ -40,7 +40,7 @@ Orphan tasks now show their last-known worker and estimated abandonment time. Fa
 ## Deployment Improvements
 
 ### Docker Compose workflow
-We modeled the deployment experience after Docmost—download a single `docker-compose.yaml`, set `RABBITMQ_URL`, run one command. No configuration sprawl, no vendor lock-in. Bring your own RabbitMQ and PostgreSQL.
+We modeled the deployment experience after Docmost — download a single `docker-compose.yaml`, set `RABBITMQ_URL`, run one command. No configuration sprawl, no vendor lock-in. Bring your own RabbitMQ and PostgreSQL.
 
 ```bash
 curl -O https://raw.githubusercontent.com/getkanchi/kanchi/main/docker-compose.yaml
@@ -66,6 +66,6 @@ Removed unused keybindings that were triggering accidentally. Added comprehensiv
 
 ## What's Next
 
-This release focused on automation and stability. Now that the foundation is solid, we're shifting focus to the details that make software feel good to use—refined interactions, thoughtful design decisions, and the kind of polish that comes from sweating the small stuff ✨.
+This release focused on automation and stability. Now that the foundation is solid, we're shifting focus to the details that make software feel good to use — refined interactions, thoughtful design decisions, and the kind of polish that comes from sweating the small stuff ✨.
 
-If you're upgrading from v1.0.0, database migrations run automatically. Existing orphan batch and retry logic remains unchanged—workflows are opt-in automation on top of the existing foundation.
+If you're upgrading from v1.0.0, database migrations run automatically. Existing orphan batch and retry logic remains unchanged — workflows are opt-in automation on top of the existing foundation.

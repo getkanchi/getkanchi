@@ -21,7 +21,8 @@ const features = [
   {
     Icon: AlertTriangle,
     name: "Orphan Detection",
-    description: "Only Celery monitoring tool with automatic orphan detection and one-click retry.",
+    description:
+      "Only Celery monitoring tool with automatic orphan detection and one-click retry.",
     href: "#",
     cta: "Learn more",
     className: "md:col-span-2",
@@ -39,7 +40,7 @@ const features = [
                 "h-14 w-14 rounded border transition-all duration-300 relative",
                 i === 4
                   ? "border-warning/80 bg-warning/25 shadow-lg shadow-warning/30 animate-pulse"
-                  : "border-muted bg-card/30 hover:border hover:border-muted/80 duration-0"
+                  : "border-muted bg-card/30 hover:border hover:border-muted/80 duration-0",
               )}
             >
               {i === 4 && (
@@ -56,7 +57,8 @@ const features = [
   {
     Icon: Activity,
     name: "Real-Time WebSocket",
-    description: "Live task updates without polling overhead. Zero latency monitoring.",
+    description:
+      "Live task updates without polling overhead. Zero latency monitoring.",
     href: "#",
     cta: "Learn more",
     className: "md:col-span-1",
@@ -82,25 +84,29 @@ const features = [
                 delay: i * 0.6,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatDelay: 1.5,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
               className={cn(
                 "h-7 rounded border px-2.5 backdrop-blur-sm flex items-center justify-between font-mono text-xs",
                 item.status === "success"
                   ? "bg-background text-success"
-                  : "border-info/70 bg-info/20 text-info"
+                  : "border-info/70 bg-info/20 text-info",
               )}
             >
               <span className="flex items-center gap-1.5">
-                <span className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  item.status === "success"
-                    ? "bg-success"
-                    : "bg-info animate-pulse"
-                )} />
+                <span
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    item.status === "success"
+                      ? "bg-success"
+                      : "bg-info animate-pulse",
+                  )}
+                />
                 <span className="font-semibold">{item.task}</span>
               </span>
-              <span className="text-[10px] text-muted-foreground">#{item.id}</span>
+              <span className="text-[10px] text-muted-foreground">
+                #{item.id}
+              </span>
             </motion.div>
           ))}
         </div>
@@ -110,7 +116,8 @@ const features = [
   {
     Icon: Workflow,
     name: "Workflow Automation",
-    description: "Event-driven actions without writing code. 14+ operators, webhooks, retries.",
+    description:
+      "Event-driven actions without writing code. 14+ operators, webhooks, retries.",
     href: "#",
     cta: "Learn more",
     className: "md:col-span-1",
@@ -149,12 +156,18 @@ const features = [
           </motion.div>
 
           {/* Connection lines */}
-          <svg className="absolute inset-0 w-full h-full" style={{ overflow: 'visible' }}>
+          <svg
+            className="absolute inset-0 w-full h-full"
+            style={{ overflow: "visible" }}
+          >
             <motion.line
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              x1="50%" y1="18" x2="16" y2="88%"
+              x1="50%"
+              y1="18"
+              x2="16"
+              y2="88%"
               stroke="hsl(199, 89%, 58%)"
               strokeWidth="1.5"
               strokeOpacity="0.5"
@@ -164,7 +177,10 @@ const features = [
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              x1="50%" y1="18" x2="112" y2="88%"
+              x1="50%"
+              y1="18"
+              x2="112"
+              y2="88%"
               stroke="hsl(158, 64%, 52%)"
               strokeWidth="1.5"
               strokeOpacity="0.5"
@@ -178,7 +194,8 @@ const features = [
   {
     Icon: Zap,
     name: "Worker Health",
-    description: "Real-time status, CPU/memory metrics, and heartbeat monitoring.",
+    description:
+      "Real-time status, CPU/memory metrics, and heartbeat monitoring.",
     href: "#",
     cta: "Learn more",
     className: "md:col-span-1",
@@ -187,20 +204,43 @@ const features = [
         <div className="absolute inset-0 bg-gradient-to-br from-success/15 via-transparent to-transparent" />
         <div className="px-6 w-full space-y-1.5 scale-95">
           {[
-            { label: "CPU", value: 45, colorClass: "text-success", bgClass: "bg-success" },
-            { label: "MEM", value: 62, colorClass: "text-info", bgClass: "bg-info" },
-            { label: "LOAD", value: 28, colorClass: "text-warning", bgClass: "bg-warning" },
+            {
+              label: "CPU",
+              value: 45,
+              colorClass: "text-success",
+              bgClass: "bg-success",
+            },
+            {
+              label: "MEM",
+              value: 62,
+              colorClass: "text-info",
+              bgClass: "bg-info",
+            },
+            {
+              label: "LOAD",
+              value: 28,
+              colorClass: "text-warning",
+              bgClass: "bg-warning",
+            },
           ].map((metric, i) => (
             <div key={metric.label} className="space-y-0.5">
               <div className="flex justify-between items-center text-[10px] font-mono">
-                <span className="text-foreground/70 font-bold">{metric.label}</span>
-                <span className={cn("font-bold", metric.colorClass)}>{metric.value}%</span>
+                <span className="text-foreground/70 font-bold">
+                  {metric.label}
+                </span>
+                <span className={cn("font-bold", metric.colorClass)}>
+                  {metric.value}%
+                </span>
               </div>
               <div className="h-1 rounded-sm bg-card/40 border border-border/30 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${metric.value}%` }}
-                  transition={{ duration: 1.5, delay: i * 0.2, ease: "easeOut" }}
+                  transition={{
+                    duration: 1.5,
+                    delay: i * 0.2,
+                    ease: "easeOut",
+                  }}
                   className={cn("h-full", metric.bgClass)}
                 />
               </div>
@@ -213,7 +253,8 @@ const features = [
   {
     Icon: BarChart3,
     name: "Advanced Analytics",
-    description: "Daily statistics, timeline visualization, and trend analysis built-in.",
+    description:
+      "Daily statistics, timeline visualization, and trend analysis built-in.",
     href: "#",
     cta: "Learn more",
     className: "md:col-span-1",
@@ -236,13 +277,16 @@ const features = [
               animate={{ height: `${bar.height}%`, opacity: 1 }}
               transition={{
                 height: { duration: 0.8, delay: i * 0.1, ease: "easeOut" },
-                opacity: { duration: 0.3, delay: i * 0.1 }
+                opacity: { duration: 0.3, delay: i * 0.1 },
               }}
               className={cn(
                 "flex-1 rounded-t shadow-md border-t-2",
-                bar.color === "info" && "bg-info/30 shadow-info/20 border-info/70",
-                bar.color === "success" && "bg-success/30 shadow-success/20 border-success/70",
-                bar.color === "warning" && "bg-warning/30 shadow-warning/20 border-warning/70"
+                bar.color === "info" &&
+                  "bg-info/30 shadow-info/20 border-info/70",
+                bar.color === "success" &&
+                  "bg-success/30 shadow-success/20 border-success/70",
+                bar.color === "warning" &&
+                  "bg-warning/30 shadow-warning/20 border-warning/70",
               )}
             />
           ))}
@@ -253,7 +297,8 @@ const features = [
   {
     Icon: Layers,
     name: "Multi-Environment",
-    description: "Separate prod/staging/dev with wildcard patterns and session persistence.",
+    description:
+      "Separate prod/staging/dev with wildcard patterns and session persistence.",
     href: "#",
     cta: "Learn more",
     className: "md:col-span-1",
@@ -263,7 +308,7 @@ const features = [
           {[
             { env: "prod", count: 12, color: "success" },
             { env: "staging", count: 8, color: "warning" },
-            { env: "dev", count: 5, color: "info" }
+            { env: "dev", count: 5, color: "info" },
           ].map((item, i) => (
             <motion.div
               key={item.env}
@@ -272,31 +317,37 @@ const features = [
               transition={{
                 duration: 0.5,
                 delay: i * 0.15,
-                ease: "easeOut"
+                ease: "easeOut",
               }}
               className={cn(
                 "rounded border p-2.5 text-xs font-mono flex items-center justify-between backdrop-blur-sm",
                 item.color === "success" && "border-success/70 bg-success/15",
                 item.color === "warning" && "border-warning/70 bg-warning/15",
-                item.color === "info" && "border-info/70 bg-info/15"
+                item.color === "info" && "border-info/70 bg-info/15",
               )}
             >
               <div className="flex items-center gap-2">
-                <span className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  item.color === "success" && "bg-success",
-                  item.color === "warning" && "bg-warning",
-                  item.color === "info" && "bg-info"
-                )} />
-                <span className="text-foreground font-bold text-[11px]">{item.env}</span>
+                <span
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    item.color === "success" && "bg-success",
+                    item.color === "warning" && "bg-warning",
+                    item.color === "info" && "bg-info",
+                  )}
+                />
+                <span className="text-foreground font-bold text-[11px]">
+                  {item.env}
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className={cn(
-                  "font-bold text-xs",
-                  item.color === "success" && "text-success",
-                  item.color === "warning" && "text-warning",
-                  item.color === "info" && "text-info"
-                )}>
+                <span
+                  className={cn(
+                    "font-bold text-xs",
+                    item.color === "success" && "text-success",
+                    item.color === "warning" && "text-warning",
+                    item.color === "info" && "text-info",
+                  )}
+                >
                   <NumberTicker value={item.count} />
                 </span>
                 <span className="text-muted-foreground text-[10px]">tasks</span>

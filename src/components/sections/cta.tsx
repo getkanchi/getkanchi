@@ -1,7 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Github, BookOpen, Terminal as TerminalIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Github,
+  BookOpen,
+  Terminal as TerminalIcon,
+} from "lucide-react";
 import { ShimmerButton } from "@/components/magicui/shimmer-button";
 import { Button } from "@/components/ui/button";
 
@@ -29,7 +34,8 @@ export function CTASection() {
               <span className="text-primary">under 5 minutes</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              docker run, configure, monitor. Self-hosted. Open source. FSL licensed.
+              docker run, configure, monitor. Self-hosted. Open source. FSL
+              licensed.
             </p>
           </motion.div>
 
@@ -51,7 +57,11 @@ export function CTASection() {
               className="bg-card/50 backdrop-blur-sm hover:bg-card font-semibold"
               asChild
             >
-              <a href="https://github.com/getkanchi/kanchi" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://github.com/getkanchi/kanchi"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Github className="w-4 h-4" />
                 View on GitHub
               </a>

@@ -46,11 +46,7 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "installation"
-      ]
+      "pages": ["introduction", "quickstart", "installation"]
     },
     {
       "group": "Core Concepts",

@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import {CodeBlock, Pre} from "fumadocs-ui/components/codeblock";
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -15,7 +15,11 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     img: ({ className, ...props }: React.ComponentProps<"img">) => (
       // eslint-disable-next-line @next/next/no-img-element
-      <img className={cn("rounded-md border", className)} {...props} alt={props.alt || ""} />
+      <img
+        className={cn("rounded-md border", className)}
+        {...props}
+        alt={props.alt || ""}
+      />
     ),
     Video: ({ className, ...props }: React.ComponentProps<"video">) => (
       <video

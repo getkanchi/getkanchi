@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
-import { JetBrains_Mono } from "next/font/google";
-import { Archivo } from "next/font/google";
+import type { Metadata } from "next";
+import { Archivo, JetBrains_Mono } from "next/font/google";
 import { Header } from "@/components/sections/header";
 import "./globals.css";
 
@@ -19,7 +18,8 @@ const archivo = Archivo({
 
 export const metadata: Metadata = {
   title: "Kanchi - Self-hosted Celery monitoring. Built for developers.",
-  description: "Real-time Celery task monitoring with automatic orphan detection, worker health tracking, and workflow automation. Open source and production-ready.",
+  description:
+    "Real-time Celery task monitoring with automatic orphan detection, worker health tracking, and workflow automation. Open source and production-ready.",
   keywords: [
     "celery",
     "monitoring",
@@ -39,13 +39,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://getkanchi.com",
     title: "Kanchi - Self-hosted Celery monitoring",
-    description: "Real-time Celery task monitoring with automatic orphan detection and workflow automation.",
+    description:
+      "Real-time Celery task monitoring with automatic orphan detection and workflow automation.",
     siteName: "Kanchi",
   },
   twitter: {
     card: "summary_large_image",
     title: "Kanchi - Self-hosted Celery monitoring",
-    description: "Real-time Celery task monitoring with automatic orphan detection and workflow automation.",
+    description:
+      "Real-time Celery task monitoring with automatic orphan detection and workflow automation.",
     creator: "@czyber_",
   },
   metadataBase: new URL("https://getkanchi.com"),
@@ -59,10 +61,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark overflow-x-hidden">
       <body
-        className={`${GeistSans.variable} ${jetbrainsMono.variable} ${archivo.variable} font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)] overflow-x-hidden`}
+        className={`${GeistSans.variable} ${jetbrainsMono.variable} ${archivo.variable} flex min-h-screen flex-col font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)] overflow-x-hidden`}
       >
         <Header />
-        {children}
+        <main className="pt-12 md:pt-[3.5rem]">{children}</main>
       </body>
     </html>
   );

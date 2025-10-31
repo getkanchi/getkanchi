@@ -1,0 +1,9 @@
+{
+  "title": "Core Concepts",
+  "pages": [
+    "architecture",
+    "orphan-detection",
+    "worker-health",
+    "workflow-automation"
+  ]
+}

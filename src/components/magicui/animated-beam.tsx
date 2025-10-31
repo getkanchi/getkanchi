@@ -106,7 +106,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       className={cn(
         "pointer-events-none absolute left-0 top-0 transform-gpu",
-        className
+        className,
       )}
       viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
     >
@@ -154,7 +154,11 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
             </>
           ) : (
             <>
-              <stop stopColor={gradientStartColor} stopOpacity="0" offset="0%" />
+              <stop
+                stopColor={gradientStartColor}
+                stopOpacity="0"
+                offset="0%"
+              />
               <stop stopColor={gradientStartColor} offset="50%">
                 <animate
                   attributeName="offset"
@@ -164,7 +168,11 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
                   repeatCount="indefinite"
                 />
               </stop>
-              <stop stopColor={gradientStopColor} stopOpacity="0" offset="100%" />
+              <stop
+                stopColor={gradientStopColor}
+                stopOpacity="0"
+                offset="100%"
+              />
             </>
           )}
         </linearGradient>

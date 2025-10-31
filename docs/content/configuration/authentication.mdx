@@ -1,0 +1,636 @@
+---
+title: Authentication
+description: Secure your Kanchi instance with basic auth or OAuth (Google, GitHub).
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Accordions, Accordion } from 'fumadocs-ui/components/accordion';
+
+Authentication is optional and disabled by default. When enabled, users must authenticate before accessing Kanchi. Choose basic auth for simple username/password login, or OAuth for single sign-on with Google or GitHub.
+
+<Callout>
+Authentication is **opt-in**. Existing deployments continue working without changes. Set `AUTH_ENABLED=true` to require authentication.
+</Callout>
+
+## Why authenticate?
+
+**Use authentication when:**
+- Kanchi is exposed on a public network
+- Multiple people access the same instance
+- You need audit trails (who did what)
+- Corporate policy requires authentication
+- You want email-based access control
+
+**Skip authentication when:**
+- Running locally on trusted networks
+- Single-user development environments
+- Behind existing authentication (VPN, SSO gateway)
+
+## Authentication methods
+
+Kanchi supports three authentication methods. Enable any combination:
+
+<Cards className="mt-6">
+  <Card href="#basic-authentication" title="Basic Auth" description="Username and password. Simple setup, no external dependencies." />
+  <Card href="#google-oauth" title="Google OAuth" description="Single sign-on with Google accounts. Requires Google Cloud setup." />
+  <Card href="#github-oauth" title="GitHub OAuth" description="Single sign-on with GitHub accounts. Requires GitHub OAuth app." />
+</Cards>
+
+All methods support email pattern restrictions to limit who can access Kanchi.
+
+## Basic Authentication
+
+Username and password authentication. Best for small teams or when OAuth isn't available.
+
+<Steps>
+  <Step>
+    **Generate a password hash**
+
+    For production, never use plain passwords. Generate a PBKDF2 hash:
+
+    ```bash
+    python3 << 'SCRIPT'
+    import os, base64, hashlib
+
+    # Set your password here or via environment variable
+    password = os.environ.get('KANCHI_PASSWORD', 'your-secure-password').encode('utf-8')
+
+    # Generate random salt
+    salt = base64.b64encode(os.urandom(16)).decode('ascii').strip('=')
+
+    # 260,000 iterations (OWASP recommendation)
+    iterations = 260000
+
+    # Derive key using PBKDF2-SHA256
+    derived_key = hashlib.pbkdf2_hmac('sha256', password, salt.encode('utf-8'), iterations)
+
+    # Format as Django-compatible hash
+    hash_string = f"pbkdf2_sha256${iterations}${salt}${base64.b64encode(derived_key).decode('ascii')}"
+
+    print("\nYour password hash:")
+    print(hash_string)
+    print("\nAdd this to your environment:")
+    print(f"export BASIC_AUTH_PASSWORD_HASH='{hash_string}'")
+    SCRIPT
+    ```
+
+    Example output:
+
+    ```
+    pbkdf2_sha256$260000$xQb1234abcd$N8DkMGHFJK...
+    ```
+
+    <Callout type="warn">
+    **Development only**: You can use `BASIC_AUTH_PASSWORD=plain-text` for local testing, but **never in production**.
+    </Callout>
+  </Step>
+
+  <Step>
+    **Generate secrets**
+
+    Create secure random secrets for token signing:
+
+    ```bash
+    export SESSION_SECRET_KEY=$(openssl rand -hex 32)
+    export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+    ```
+
+    <Callout>
+    These secrets are critical. If they leak, attackers can forge authentication tokens. Store them securely (environment variables, secrets manager, etc.).
+    </Callout>
+  </Step>
+
+  <Step>
+    **Configure environment variables**
+
+    ```bash
+    # Enable authentication
+    export AUTH_ENABLED=true
+
+    # Enable basic auth
+    export AUTH_BASIC_ENABLED=true
+
+    # Set credentials
+    export BASIC_AUTH_USERNAME=kanchi-admin
+    export BASIC_AUTH_PASSWORD_HASH='pbkdf2_sha256$260000$...'
+
+    # Secrets (from Step 2)
+    export SESSION_SECRET_KEY=<your-random-secret>
+    export TOKEN_SECRET_KEY=<your-random-secret>
+
+    # CORS (allow your frontend)
+    export ALLOWED_ORIGINS=http://localhost:3000,https://kanchi.example.com
+    export ALLOWED_HOSTS=localhost,127.0.0.1,kanchi.example.com
+
+    # Optional: Restrict by email pattern
+    export ALLOWED_EMAIL_PATTERNS='*@example.com,*@company.org'
+    ```
+
+    <Callout type="info">
+    The username becomes the user's email in Kanchi. If `BASIC_AUTH_USERNAME=admin`, the user's email is `admin` (no @domain).
+    </Callout>
+  </Step>
+
+  <Step>
+    **Restart Kanchi**
+
+    <Tabs items={['Docker Compose', 'Docker', 'Local']}>
+      <Tab value="compose">
+        ```bash
+        docker compose restart
+        ```
+      </Tab>
+      <Tab value="docker">
+        ```bash
+        docker restart kanchi
+        ```
+      </Tab>
+      <Tab value="local">
+        ```bash
+        # Stop running processes (Ctrl+C)
+        # Then restart:
+        make dev
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    **Test authentication**
+
+    Navigate to `http://localhost:3000` (or your Kanchi URL). You'll be redirected to `/login`.
+
+    Enter your credentials:
+    - **Username**: `kanchi-admin` (or whatever you set)
+    - **Password**: The password you hashed in Step 1
+
+    After successful login, you'll be redirected to the dashboard.
+  </Step>
+</Steps>
+
+## Google OAuth
+
+Single sign-on with Google accounts. Users click "Continue with Google" and authenticate with their Google account.
+
+<Steps>
+  <Step>
+    **Create Google OAuth credentials**
+
+    1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+    2. Create a new project or select existing
+    3. Navigate to **APIs & Services > Credentials**
+    4. Click **Create Credentials > OAuth 2.0 Client ID**
+    5. Configure consent screen if prompted
+    6. Set **Application type** to **Web application**
+    7. Add **Authorized redirect URI**:
+
+       ```
+       https://kanchi.example.com/api/auth/oauth/google/callback
+       ```
+
+       Replace `kanchi.example.com` with your actual backend URL.
+
+    8. Click **Create**
+    9. Copy **Client ID** and **Client Secret**
+
+    <Callout type="warn">
+    The redirect URI must **exactly match** your `OAUTH_REDIRECT_BASE_URL` + `/api/auth/oauth/google/callback`. Trailing slashes matter. Protocols (http vs https) matter.
+    </Callout>
+  </Step>
+
+  <Step>
+    **Generate secrets**
+
+    ```bash
+    export SESSION_SECRET_KEY=$(openssl rand -hex 32)
+    export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+    ```
+  </Step>
+
+  <Step>
+    **Configure environment variables**
+
+    ```bash
+    # Enable authentication
+    export AUTH_ENABLED=true
+
+    # Enable Google OAuth
+    export AUTH_GOOGLE_ENABLED=true
+    export GOOGLE_CLIENT_ID='123456-abcdef.apps.googleusercontent.com'
+    export GOOGLE_CLIENT_SECRET='GOCSPX-your-client-secret'
+
+    # OAuth redirect base URL (your backend's public URL)
+    export OAUTH_REDIRECT_BASE_URL='https://kanchi.example.com'
+
+    # Secrets
+    export SESSION_SECRET_KEY=<your-random-secret>
+    export TOKEN_SECRET_KEY=<your-random-secret>
+
+    # CORS
+    export ALLOWED_ORIGINS=https://kanchi.example.com
+    export ALLOWED_HOSTS=kanchi.example.com
+
+    # Optional: Restrict to specific email domains
+    export ALLOWED_EMAIL_PATTERNS='*@example.com,*@company.org'
+
+    # Optional: Token lifetimes (defaults shown)
+    export ACCESS_TOKEN_LIFETIME_MINUTES=30
+    export REFRESH_TOKEN_LIFETIME_HOURS=24
+    ```
+
+    <Callout>
+    `OAUTH_REDIRECT_BASE_URL` is the **backend** URL (where the API runs), not the frontend URL. This is where OAuth providers redirect after authentication.
+    </Callout>
+  </Step>
+
+  <Step>
+    **Restart Kanchi**
+
+    ```bash
+    docker compose restart
+    ```
+  </Step>
+
+  <Step>
+    **Test OAuth flow**
+
+    1. Navigate to `https://kanchi.example.com/login`
+    2. Click **Continue with Google**
+    3. A popup opens with Google sign-in
+    4. Sign in and approve access
+    5. Popup closes, you're redirected to dashboard
+
+    If it works: you're done! If not, check troubleshooting below.
+  </Step>
+</Steps>
+
+## GitHub OAuth
+
+Single sign-on with GitHub accounts. Users click "Continue with GitHub" and authenticate with GitHub.
+
+<Steps>
+  <Step>
+    **Create GitHub OAuth app**
+
+    1. Go to [GitHub Settings > Developer settings > OAuth Apps](https://github.com/settings/developers)
+    2. Click **New OAuth App**
+    3. Fill in details:
+       - **Application name**: Kanchi
+       - **Homepage URL**: `https://kanchi.example.com`
+       - **Authorization callback URL**:
+
+         ```
+         https://kanchi.example.com/api/auth/oauth/github/callback
+         ```
+
+    4. Click **Register application**
+    5. Copy **Client ID**
+    6. Click **Generate a new client secret**
+    7. Copy **Client Secret** immediately (shown only once)
+
+    <Callout type="warn">
+    The callback URL must **exactly match** your `OAUTH_REDIRECT_BASE_URL` + `/api/auth/oauth/github/callback`.
+    </Callout>
+  </Step>
+
+  <Step>
+    **Generate secrets**
+
+    ```bash
+    export SESSION_SECRET_KEY=$(openssl rand -hex 32)
+    export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+    ```
+  </Step>
+
+  <Step>
+    **Configure environment variables**
+
+    ```bash
+    # Enable authentication
+    export AUTH_ENABLED=true
+
+    # Enable GitHub OAuth
+    export AUTH_GITHUB_ENABLED=true
+    export GITHUB_CLIENT_ID='Iv1.1234567890abcdef'
+    export GITHUB_CLIENT_SECRET='your-client-secret-here'
+
+    # OAuth redirect base URL (your backend's public URL)
+    export OAUTH_REDIRECT_BASE_URL='https://kanchi.example.com'
+
+    # Secrets
+    export SESSION_SECRET_KEY=<your-random-secret>
+    export TOKEN_SECRET_KEY=<your-random-secret>
+
+    # CORS
+    export ALLOWED_ORIGINS=https://kanchi.example.com
+    export ALLOWED_HOSTS=kanchi.example.com
+
+    # Optional: Restrict to specific email domains
+    export ALLOWED_EMAIL_PATTERNS='*@example.com,*@mycompany.com'
+    ```
+  </Step>
+
+  <Step>
+    **Restart Kanchi**
+
+    ```bash
+    docker compose restart
+    ```
+  </Step>
+
+  <Step>
+    **Test OAuth flow**
+
+    1. Navigate to `https://kanchi.example.com/login`
+    2. Click **Continue with GitHub**
+    3. Sign in with GitHub and authorize
+    4. You're redirected back to Kanchi dashboard
+
+    First-time users are automatically created in Kanchi's database.
+  </Step>
+</Steps>
+
+## Email access control
+
+Restrict who can access Kanchi based on email patterns. Works with all authentication methods.
+
+**Pattern syntax:**
+
+```bash
+# Allow specific domain
+ALLOWED_EMAIL_PATTERNS='*@example.com'
+
+# Allow multiple domains
+ALLOWED_EMAIL_PATTERNS='*@example.com,*@company.org'
+
+# Allow specific user
+ALLOWED_EMAIL_PATTERNS='admin@example.com'
+
+# Complex patterns (Unix fnmatch wildcards)
+ALLOWED_EMAIL_PATTERNS='*@example.com,admin@*.org,user+*@company.com'
+```
+
+**How it works:**
+
+1. User authenticates with provider (Google, GitHub, or basic auth)
+2. Kanchi extracts email from authentication response
+3. Email is lowercased and checked against patterns
+4. If no match: login fails with `403 Forbidden`
+5. If match or empty pattern: login succeeds
+
+**Examples:**
+
+- `*@example.com` matches `alice@example.com`, `bob@example.com`
+- `admin@*` matches `admin@example.com`, `admin@company.org`
+- `*@*.example.com` matches `user@subdomain.example.com`
+
+<Callout type="warn">
+Empty or unset `ALLOWED_EMAIL_PATTERNS` allows **all** emails. For production, always set explicit patterns.
+</Callout>
+
+## Multiple authentication methods
+
+Enable multiple methods simultaneously. Users choose their preferred method on the login page.
+
+```bash
+# Enable all three methods
+export AUTH_ENABLED=true
+
+# Basic auth
+export AUTH_BASIC_ENABLED=true
+export BASIC_AUTH_USERNAME='admin'
+export BASIC_AUTH_PASSWORD_HASH='pbkdf2_sha256$...'
+
+# Google OAuth
+export AUTH_GOOGLE_ENABLED=true
+export GOOGLE_CLIENT_ID='...'
+export GOOGLE_CLIENT_SECRET='...'
+
+# GitHub OAuth
+export AUTH_GITHUB_ENABLED=true
+export GITHUB_CLIENT_ID='...'
+export GITHUB_CLIENT_SECRET='...'
+
+# Common settings
+export OAUTH_REDIRECT_BASE_URL='https://kanchi.example.com'
+export ALLOWED_EMAIL_PATTERNS='*@example.com'
+export SESSION_SECRET_KEY=$(openssl rand -hex 32)
+export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+```
+
+The login page shows buttons for all enabled methods. Email restrictions apply to all methods.
+
+## Troubleshooting
+
+<Accordions type="single" collapsible>
+  <Accordion title="OAuth redirect URI mismatch" value="redirect-mismatch">
+    **Error**: `redirect_uri_mismatch` from OAuth provider
+
+    **Fixes**:
+
+    1. **Check OAUTH_REDIRECT_BASE_URL**: Must match exactly what you configured in provider console
+    2. **Remove trailing slashes**: Use `https://kanchi.example.com`, not `https://kanchi.example.com/`
+    3. **Protocol matters**: `http` vs `https` must match
+    4. **Port numbers**: Include if non-standard (`http://localhost:8765`)
+    5. **Verify in provider console**: Check authorized redirect URIs
+
+    **Google**: `{BASE_URL}/api/auth/oauth/google/callback`
+    **GitHub**: `{BASE_URL}/api/auth/oauth/github/callback`
+  </Accordion>
+
+  <Accordion title="CORS errors in browser console" value="cors-errors">
+    **Error**: `Access to fetch at ... has been blocked by CORS policy`
+
+    **Fixes**:
+
+    1. **Set ALLOWED_ORIGINS**: Must include frontend URL
+
+       ```bash
+       export ALLOWED_ORIGINS=https://kanchi-frontend.com
+       ```
+
+    2. **Set ALLOWED_HOSTS**: Must include backend hostname
+
+       ```bash
+       export ALLOWED_HOSTS=kanchi-backend.com
+       ```
+
+    3. **Check protocol**: Frontend and backend must both use http or both use https
+    4. **Restart after changes**: CORS configuration loads at startup
+
+    **For local development**:
+
+    ```bash
+    export ALLOWED_ORIGINS=http://localhost:3000
+    export ALLOWED_HOSTS=localhost,127.0.0.1
+    ```
+  </Accordion>
+
+  <Accordion title="Email not allowed (403 Forbidden)" value="email-forbidden">
+    **Error**: Login succeeds but immediately fails with `403 Forbidden`
+
+    **Fixes**:
+
+    1. **Check pattern syntax**:
+
+       ```bash
+       # Correct
+       ALLOWED_EMAIL_PATTERNS='*@example.com'
+
+       # Wrong (missing quotes)
+       ALLOWED_EMAIL_PATTERNS=*@example.com
+       ```
+
+    2. **Test your pattern**: Email matching is case-insensitive
+
+       - Pattern: `*@example.com`
+       - Matches: `alice@example.com`, `Bob@Example.com`
+       - Doesn't match: `alice@company.com`
+
+    3. **Multiple patterns**: Use comma separator
+
+       ```bash
+       ALLOWED_EMAIL_PATTERNS='*@example.com,*@company.org'
+       ```
+
+    4. **Empty pattern allows all**: If you don't want restrictions, leave it empty
+  </Accordion>
+
+  <Accordion title="Invalid password hash format" value="invalid-hash">
+    **Error**: `Invalid password hash format` when using basic auth
+
+    **Fixes**:
+
+    1. **Check hash format**: Must start with `pbkdf2_sha256$`
+
+       ```
+       pbkdf2_sha256$260000$salt$hash
+       ```
+
+    2. **Regenerate hash**: Use the Python script from the basic auth setup
+    3. **Quote the hash**: Wrap in single quotes to preserve special characters
+
+       ```bash
+       export BASIC_AUTH_PASSWORD_HASH='pbkdf2_sha256$...'
+       ```
+
+    4. **No extra whitespace**: Hash should be one continuous string
+  </Accordion>
+
+  <Accordion title="Tokens not persisting after page refresh" value="tokens-lost">
+    **Symptom**: Logged out after refreshing page
+
+    **Fixes**:
+
+    1. **Check browser localStorage**: Open DevTools > Application > Local Storage
+
+       Should see:
+       - `kanchi_access_token`
+       - `kanchi_refresh_token`
+       - `kanchi_session_id`
+
+    2. **Private browsing mode**: Some browsers block localStorage in private mode
+    3. **Clear site data**: If tokens are corrupted, clear localStorage and re-login
+    4. **Check browser extensions**: Ad blockers or privacy extensions may interfere
+  </Accordion>
+
+  <Accordion title="WebSocket connection fails (4401)" value="websocket-auth">
+    **Error**: WebSocket closes with code `4401`
+
+    **Fixes**:
+
+    1. **Verify token is valid**: Test with API call first
+
+       ```bash
+       curl https://kanchi.example.com/api/auth/me \
+         -H "Authorization: Bearer YOUR_TOKEN"
+       ```
+
+    2. **Check WebSocket URL**: Token should be in query parameter
+
+       ```javascript
+       ws://kanchi.example.com/ws?token=YOUR_TOKEN
+       ```
+
+    3. **Token expired**: Tokens expire after 30 minutes (default). Frontend should auto-refresh, but check token expiry
+    4. **AUTH_ENABLED mismatch**: Backend has auth enabled but frontend isn't sending token
+  </Accordion>
+
+  <Accordion title="Warning about default secret keys" value="default-secrets">
+    **Warning**: `Using default SESSION_SECRET_KEY is insecure`
+
+    **Fix**: Generate proper secrets
+
+    ```bash
+    export SESSION_SECRET_KEY=$(openssl rand -hex 32)
+    export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+    ```
+
+    **Never use** `change-me` or other default values in production. These secrets protect authentication tokens.
+  </Accordion>
+</Accordions>
+
+## Production checklist
+
+Before deploying authentication to production:
+
+- [ ] **Secrets are random** — Never use `change-me` or default values
+- [ ] **Use HTTPS** — All production URLs should use `https://`
+- [ ] **Password hashes** — Never use `BASIC_AUTH_PASSWORD` in production
+- [ ] **CORS configured** — Set specific `ALLOWED_ORIGINS`, not `*`
+- [ ] **Email restrictions** — Set `ALLOWED_EMAIL_PATTERNS` to limit access
+- [ ] **OAuth redirect URIs match** — Verify in provider console
+- [ ] **Secrets are secure** — Store in secrets manager or encrypted environment
+- [ ] **Test token refresh** — Verify tokens refresh before expiry
+- [ ] **Monitor failed logins** — Check logs for authentication errors
+- [ ] **Database backups** — Ensure user data is backed up
+
+## How authentication works
+
+**Token system**:
+
+1. User logs in (basic auth or OAuth)
+2. Backend generates two tokens:
+   - **Access token** (30 min default) — Used for API requests
+   - **Refresh token** (24 hours default) — Used to get new access tokens
+3. Tokens are signed with `TOKEN_SECRET_KEY` using HMAC-SHA256
+4. Token hashes (not tokens themselves) are stored in database
+5. Frontend stores tokens in localStorage
+6. Frontend includes access token in `Authorization: Bearer` header
+7. Backend validates token on every request
+8. When access token expires, frontend automatically refreshes it
+9. When refresh token expires, user must re-login
+
+**OAuth flow**:
+
+1. User clicks "Continue with Google/GitHub"
+2. Popup opens with provider authorization page
+3. User approves access
+4. Provider redirects to Kanchi callback URL with authorization code
+5. Backend exchanges code for provider's access token
+6. Backend fetches user info from provider
+7. Backend checks email against `ALLOWED_EMAIL_PATTERNS`
+8. User is created/updated in Kanchi database
+9. Kanchi access + refresh tokens are generated
+10. Tokens sent to frontend via postMessage
+11. Frontend stores tokens and completes login
+
+**Security features**:
+
+- Tokens are never stored in plain text (only SHA256 hashes)
+- PBKDF2 password hashing with 260,000 iterations
+- CSRF protection via OAuth state tokens
+- Token expiration enforced on every request
+- Automatic token refresh on 401 errors
+- Email pattern allowlist prevents unauthorized access
+
+## Next steps
+
+<Cards className="mt-6">
+  <Card href="/docs/configuration/environment" title="Environment Variables" description="Complete reference of all configuration options." />
+  <Card href="/docs/deployment/production" title="Production Deployment" description="Best practices for deploying Kanchi securely." />
+  <Card href="/docs/getting-started/quickstart" title="Quickstart" description="Get started with Kanchi in under 5 minutes." />
+</Cards>

@@ -1,0 +1,258 @@
+---
+title: Quickstart
+description: Run Kanchi locally in under 5 minutes.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Accordions, Accordion } from 'fumadocs-ui/components/accordion';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+Get Kanchi running alongside your Celery workers in minutes. This guide assumes you already have a message broker (RabbitMQ or Redis) running.
+
+<Callout type="warn">
+**Prerequisites**: You need a running message broker that your Celery workers are connected to. Kanchi monitors task events from this broker — it doesn't manage broker infrastructure for you.
+</Callout>
+
+## Quick start with Docker
+
+The fastest way to run Kanchi is with Docker:
+
+<Steps>
+  <Step>
+    **Download the Docker Compose file**
+
+    ```bash
+    mkdir kanchi && cd kanchi
+    curl -O https://raw.githubusercontent.com/getkanchi/kanchi/main/docker-compose.yaml
+    ```
+  </Step>
+
+  <Step>
+    **Configure your broker connection**
+
+    Edit `docker-compose.yaml` and set your broker URL:
+
+    <Tabs items={['RabbitMQ', 'Redis']}>
+      <Tab value="rabbitmq">
+        ```yaml
+        environment:
+          CELERY_BROKER_URL: amqp://user:password@rabbitmq-host:5672//
+        ```
+      </Tab>
+      <Tab value="redis">
+        ```yaml
+        environment:
+          CELERY_BROKER_URL: redis://redis-host:6379/0
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    **Start Kanchi**
+
+    ```bash
+    docker compose up -d --build
+    ```
+
+    Access the dashboard at [http://localhost:3000](http://localhost:3000)
+  </Step>
+
+  <Step>
+    **Verify the connection**
+
+    Check the logs to confirm Kanchi connected to your broker:
+
+    ```bash
+    docker compose logs -f kanchi
+    ```
+
+    You should see: `Connected to broker` in the output.
+  </Step>
+</Steps>
+
+<Callout>
+The same `docker compose up` command handles both initial deployment and updates. Pull new code, re-run the command, you're done.
+</Callout>
+
+## Local development setup
+
+If you're developing Kanchi or want to run it without Docker:
+
+<Steps>
+  <Step>
+    **Install dependencies**
+
+    You'll need:
+    - Python 3.8+ with Poetry
+    - Node.js 20+ with npm
+    - A running message broker (RabbitMQ or Redis)
+
+    ```bash
+    # Clone the repository
+    git clone https://github.com/getkanchi/kanchi.git
+    cd kanchi
+
+    # Backend dependencies
+    cd agent
+    poetry install
+
+    # Frontend dependencies
+    cd ../frontend
+    npm install
+    ```
+  </Step>
+
+  <Step>
+    **Configure environment variables**
+
+    Create a `.env` file or export variables:
+
+    ```bash
+    # Required: broker connection
+    export CELERY_BROKER_URL=amqp://guest:guest@localhost:5672//
+
+    # Optional: database (defaults to SQLite)
+    export DATABASE_URL=sqlite:///kanchi.db
+
+    # Optional: API URLs for frontend
+    export NUXT_PUBLIC_API_URL=http://localhost:8765
+    export NUXT_PUBLIC_WS_URL=ws://localhost:8765/ws
+    ```
+  </Step>
+
+  <Step>
+    **Start the application**
+
+    From the project root:
+
+    ```bash
+    make dev
+    ```
+
+    This starts both the FastAPI backend (port 8765) and Nuxt frontend (port 3000).
+  </Step>
+
+  <Step>
+    **Access the dashboard**
+
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
+  </Step>
+</Steps>
+
+## Generate test tasks
+
+If you want to see Kanchi in action without a production workload, use the included test environment:
+
+```bash
+cd scripts/test-celery-app
+
+# Start RabbitMQ, Redis, and test Celery workers
+make start
+
+# Generate mixed task load (success, failures, retries)
+make test-mixed
+
+# Generate only successful tasks
+make test-success
+
+# Generate only failing tasks
+make test-failure
+
+# Stop test environment
+make stop
+```
+
+Tasks will appear in the Kanchi dashboard in real-time as they execute.
+
+## Verify your setup
+
+<Steps>
+  <Step>
+    **Check backend health**
+
+    ```bash
+    curl http://localhost:8765/api/health
+    ```
+
+    You should get a `200 OK` response.
+  </Step>
+
+  <Step>
+    **Verify broker connection**
+
+    Check application logs for "Connected to broker" messages:
+
+    <Tabs items={['Local', 'Docker']}>
+      <Tab value="local">
+        ```bash
+        tail -f kanchi.log
+        ```
+      </Tab>
+      <Tab value="docker">
+        ```bash
+        docker compose logs -f kanchi
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    **Run a test task**
+
+    Execute a task from your Celery application. It should appear in the Kanchi dashboard within seconds.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordions type="single" collapsible>
+  <Accordion title="No tasks appearing in dashboard" value="no-tasks">
+    **Check broker connection**: Verify that `CELERY_BROKER_URL` matches the broker your Celery workers are using. Kanchi and your workers must connect to the **same broker instance**.
+
+    **Enable event broadcasting**: Ensure your Celery workers have events enabled:
+
+    ```python
+    # In your Celery config
+    worker_send_task_events = True
+    task_send_sent_event = True
+    ```
+
+    Or start workers with the `-E` flag:
+
+    ```bash
+    celery -A your_app worker -E
+    ```
+  </Accordion>
+
+  <Accordion title="Connection refused errors" value="connection-refused">
+    **Check broker accessibility**: Ensure your message broker is running and accessible from where Kanchi is running.
+
+    For Docker deployments, use the broker's container name or IP address, not `localhost`.
+
+    **Firewall rules**: Verify that firewall rules allow connections to the broker port (5672 for RabbitMQ, 6379 for Redis).
+  </Accordion>
+
+  <Accordion title="Frontend can't connect to backend" value="frontend-connection">
+    **Check API URLs**: Verify `NUXT_PUBLIC_API_URL` and `NUXT_PUBLIC_WS_URL` point to your backend.
+
+    **CORS issues**: If running backend and frontend on different hosts, configure `ALLOWED_ORIGINS`:
+
+    ```bash
+    export ALLOWED_ORIGINS=http://localhost:3000,https://your-frontend-domain.com
+    ```
+  </Accordion>
+</Accordions>
+
+## Next steps
+
+Now that Kanchi is running, explore the core features:
+
+<Cards className="mt-6">
+  <Card href="/docs/features/search-filtering" title="Task Search" description="Find specific tasks quickly with advanced filtering." />
+  <Card href="/docs/core/worker-health" title="Worker Health" description="Track worker status and performance." />
+  <Card href="/docs/core/orphan-detection" title="Orphan Detection" description="Identify and recover abandoned tasks." />
+  <Card href="/docs/core/workflow-automation" title="Workflows" description="Automate responses to task failures." />
+</Cards>

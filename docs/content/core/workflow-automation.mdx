@@ -1,0 +1,438 @@
+---
+title: Workflow Automation
+description: Automate responses to task failures with event-driven workflows.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Accordions, Accordion } from 'fumadocs-ui/components/accordion';
+
+Create workflows that respond automatically to task failures, orphan detection, or execution time thresholds. No code required — configure triggers and actions through the UI.
+
+## Why workflows?
+
+If you've ever manually retried a batch of failed tasks at 2am or wished Slack would just tell you when things break, workflows solve that.
+
+**Example use cases:**
+- Auto-retry transient failures (network timeouts, rate limits)
+- Send Slack alerts when critical tasks fail
+- Recover orphaned tasks automatically
+- Notify on-call engineers when failure rates spike
+- Escalate to humans when retry limits are exceeded
+
+## How workflows work
+
+Workflows consist of three parts:
+
+1. **Trigger**: What event kicks off the workflow (task failure, orphan detected, etc.)
+2. **Conditions**: Optional filters to narrow when the workflow runs (specific task names, queues, error patterns)
+3. **Actions**: What happens when triggered (retry task, send Slack message, webhook call)
+
+```
+Event → Conditions Check → Actions Execute → Result Logged
+```
+
+Each workflow runs independently with full execution history and rollback support.
+
+## Creating a workflow
+
+<Steps>
+  <Step>
+    **Navigate to Workflows**
+
+    From the dashboard, click **Workflows** in the sidebar, then **Create Workflow**.
+  </Step>
+
+  <Step>
+    **Choose a trigger**
+
+    Select what event should start this workflow:
+
+    - **Task Failed**: When any task transitions to FAILURE state
+    - **Task Orphaned**: When orphan detection flags an abandoned task
+    - **Execution Time Exceeded**: When a task runs longer than a threshold
+    - **Worker Offline**: When a worker stops sending heartbeats
+  </Step>
+
+  <Step>
+    **Add conditions (optional)**
+
+    Narrow when the workflow runs:
+
+    <Tabs items={['Task Name', 'Queue', 'Error Pattern', 'Multiple']}>
+      <Tab value="task-name">
+        ```yaml
+        # Only trigger for specific task
+        task_name_pattern: "myapp.tasks.send_email"
+        ```
+      </Tab>
+      <Tab value="queue">
+        ```yaml
+        # Only trigger for high-priority queue
+        queue: "priority-high"
+        ```
+      </Tab>
+      <Tab value="error">
+        ```yaml
+        # Only trigger for specific errors
+        error_pattern: "ConnectionError|Timeout"
+        ```
+      </Tab>
+      <Tab value="multiple">
+        ```yaml
+        # Combine multiple conditions
+        task_name_pattern: "myapp.tasks.*"
+        queue: "email"
+        error_pattern: "SMTPException"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    **Configure actions**
+
+    Choose what happens when the workflow triggers:
+
+    **Retry Task**
+    - Retry with same arguments
+    - Configure delay between attempts
+    - Set maximum retry count
+    - Enable exponential backoff
+
+    **Send Slack Notification**
+    - Configure webhook URL
+    - Customize message template
+    - Include task context (name, args, error)
+
+    **Call Webhook**
+    - POST task details to external endpoint
+    - Include custom headers
+    - Configure timeout and retries
+  </Step>
+
+  <Step>
+    **Set circuit breaker limits**
+
+    Prevent infinite loops:
+
+    - **Max executions**: Stop after N workflow runs
+    - **Time window**: Reset counter after X hours
+    - **On circuit open**: Send notification instead of executing actions
+  </Step>
+
+  <Step>
+    **Save and enable**
+
+    Review your workflow configuration, then click **Save and Enable**.
+
+    The workflow activates immediately and begins monitoring for matching events.
+  </Step>
+</Steps>
+
+## Circuit breaker protection
+
+Every workflow includes a circuit breaker to prevent runaway automation.
+
+**How it works:**
+
+1. Workflow tracks execution count within a rolling time window (default: 1 hour)
+2. When count exceeds threshold (default: 100 executions), circuit opens
+3. While open, workflow sends notifications instead of executing actions
+4. Circuit auto-resets after time window elapses
+
+**Example scenario:**
+
+```
+Time Window: 1 hour
+Max Executions: 50
+
+Hour 1: 45 executions → Circuit CLOSED, actions run normally
+Hour 1: 51 executions → Circuit OPEN, notifications sent instead
+Hour 2: Counter resets → Circuit CLOSED again
+```
+
+<Callout type="warn">
+Circuit breakers are critical for production deployments. A misconfigured retry workflow could create thousands of duplicate tasks if not limited.
+</Callout>
+
+## Slack integration
+
+Native Slack action for workflow notifications.
+
+<Steps>
+  <Step>
+    **Create a Slack incoming webhook**
+
+    1. Go to [Slack API: Incoming Webhooks](https://api.slack.com/messaging/webhooks)
+    2. Create a new webhook for your workspace
+    3. Choose the channel for notifications
+    4. Copy the webhook URL
+  </Step>
+
+  <Step>
+    **Configure Slack action in workflow**
+
+    In the workflow editor:
+
+    - Select **Slack Notification** action
+    - Paste your webhook URL
+    - Customize the message template
+
+    **Available variables:**
+
+    ```text
+    Task {task_name} failed on worker {worker}
+    Error: {error_message}
+    Args: {task_args}
+    Time: {timestamp}
+    Workflow: {workflow_name}
+    ```
+  </Step>
+
+  <Step>
+    **Test the integration**
+
+    Use the **Test Workflow** button to send a sample notification.
+
+    Verify it appears in your Slack channel with the correct formatting.
+  </Step>
+</Steps>
+
+## Retry orchestration
+
+Built-in retry action with configurable strategies.
+
+**Simple retry** (fixed delay):
+
+```yaml
+action:
+  type: retry
+  delay_seconds: 60        # Wait 60s before retry
+  max_attempts: 3          # Stop after 3 retries
+  same_arguments: true     # Use original task args
+```
+
+**Exponential backoff**:
+
+```yaml
+action:
+  type: retry
+  delay_seconds: 10        # Initial delay
+  max_attempts: 5
+  exponential_backoff: true
+  backoff_multiplier: 2    # Delays: 10s, 20s, 40s, 80s, 160s
+  max_delay_seconds: 300   # Cap at 5 minutes
+```
+
+**Conditional retry** (only for specific errors):
+
+```yaml
+trigger:
+  event: task.failed
+conditions:
+  error_pattern: "ConnectionError|Timeout|503"
+action:
+  type: retry
+  delay_seconds: 30
+  max_attempts: 5
+```
+
+<Callout>
+Retry workflows track parent-child task relationships. If a task is retried multiple times, the full retry chain is visible in the task detail view.
+</Callout>
+
+## Workflow templates
+
+Pre-built workflows for common scenarios.
+
+**Auto-retry transient failures**:
+
+```yaml
+name: "Auto-retry network errors"
+trigger:
+  event: task.failed
+conditions:
+  error_pattern: "ConnectionError|Timeout|ConnectionRefusedError"
+action:
+  type: retry
+  delay_seconds: 60
+  max_attempts: 3
+circuit_breaker:
+  max_executions: 100
+  time_window_hours: 1
+```
+
+**Alert on critical task failures**:
+
+```yaml
+name: "Alert on payment processing failures"
+trigger:
+  event: task.failed
+conditions:
+  task_name_pattern: "payments.process_*"
+action:
+  type: slack
+  webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK"
+  message: "💳 Payment task {task_name} failed: {error_message}"
+circuit_breaker:
+  max_executions: 50
+  time_window_hours: 1
+```
+
+**Orphan task recovery**:
+
+```yaml
+name: "Recover orphaned tasks"
+trigger:
+  event: task.orphaned
+action:
+  type: retry
+  delay_seconds: 300  # Wait 5 minutes before retry
+  max_attempts: 1     # Only retry once
+circuit_breaker:
+  max_executions: 200
+  time_window_hours: 24
+```
+
+**Escalation on repeated failures**:
+
+```yaml
+name: "Escalate after 3 failures"
+trigger:
+  event: task.failed
+conditions:
+  failure_count_threshold: 3  # Only trigger after 3rd failure
+action:
+  type: slack
+  webhook_url: "https://hooks.slack.com/services/ONCALL/WEBHOOK"
+  message: "🚨 Task {task_name} failed 3 times. Manual intervention needed."
+```
+
+## Workflow history and debugging
+
+Every workflow execution is logged with:
+
+- **Timestamp**: When the workflow ran
+- **Trigger**: Which event caused it to run
+- **Conditions**: Whether conditions matched
+- **Actions**: What actions executed and their results
+- **Circuit breaker status**: Whether the circuit was open/closed
+- **Outcome**: Success, failure, or skipped
+
+Access workflow history from the Workflows page, click workflow name, then go to the **Execution History** tab.
+
+## Best practices
+
+**Start conservative**:
+
+```yaml
+# Good: Limited retries with circuit breaker
+circuit_breaker:
+  max_executions: 50
+  time_window_hours: 1
+action:
+  max_attempts: 3
+
+# Bad: Unlimited retries, no circuit breaker
+action:
+  max_attempts: 999  # Don't do this
+```
+
+**Use specific task patterns**:
+
+```yaml
+# Good: Narrow scope
+task_name_pattern: "myapp.tasks.send_email"
+
+# Bad: Too broad, may trigger unexpectedly
+task_name_pattern: "*"
+```
+
+**Test workflows before enabling**:
+
+Use the **Test Workflow** button to simulate execution without affecting production tasks.
+
+**Monitor workflow executions**:
+
+Check execution history regularly to ensure workflows aren't triggering more often than expected.
+
+**Combine workflows for escalation**:
+
+Create multiple workflows for the same trigger with different conditions:
+
+1. First failure → Auto-retry
+2. Third failure → Send Slack alert
+3. Fifth failure → Call PagerDuty webhook
+
+## Limitations
+
+**No conditional branching**:
+
+Workflows execute actions sequentially. For complex logic (if/else, loops), use webhooks to external services.
+
+**No task cancellation**:
+
+Workflows can retry or notify, but cannot cancel running tasks. Cancellation must be handled in your Celery application.
+
+**No cross-task dependencies**:
+
+Workflows operate on individual task events. For complex task chains or DAGs, use Celery's built-in primitives (chain, chord, group).
+
+**Rate limits**:
+
+Circuit breakers prevent infinite loops, but external services (Slack, webhooks) may have their own rate limits. Configure accordingly.
+
+## Troubleshooting
+
+<Accordions type="single" collapsible>
+  <Accordion title="Workflow not triggering" value="not-triggering">
+    **Check conditions**: Ensure task events match your condition patterns exactly.
+
+    **Verify workflow is enabled**: Disabled workflows don't execute.
+
+    **Check circuit breaker**: If the circuit is open, actions won't run. View execution history to see circuit breaker status.
+
+    **Review logs**: Check Kanchi logs for workflow evaluation messages.
+  </Accordion>
+
+  <Accordion title="Too many workflow executions" value="too-many">
+    **Tighten conditions**: Add more specific task name patterns or error patterns.
+
+    **Lower circuit breaker threshold**: Reduce `max_executions` to stop workflows sooner.
+
+    **Add delays**: Increase `delay_seconds` for retry actions to slow down execution.
+  </Accordion>
+
+  <Accordion title="Slack notifications not sending" value="slack-fail">
+    **Verify webhook URL**: Test the webhook URL directly with curl:
+
+    ```bash
+    curl -X POST https://hooks.slack.com/services/YOUR/WEBHOOK \
+      -H 'Content-Type: application/json' \
+      -d '{"text":"Test message"}'
+    ```
+
+    **Check Slack app permissions**: Ensure the webhook has permission to post to the channel.
+
+    **Review workflow execution history**: Check for error messages in the action results.
+  </Accordion>
+
+  <Accordion title="Retries creating duplicate tasks" value="duplicate-retries">
+    **Check retry idempotency**: Ensure your Celery tasks are idempotent (safe to run multiple times).
+
+    **Verify circuit breaker**: Circuit should prevent unlimited retries.
+
+    **Review retry chain**: Check task detail view to see full retry history and identify duplicate retries.
+  </Accordion>
+</Accordions>
+
+## Next steps
+
+<Cards className="mt-6">
+  <Card href="/docs/core/orphan-detection" title="Orphan Detection" description="Understand how orphaned tasks are identified." />
+  <Card href="/docs/features/analytics" title="Analytics" description="Monitor workflow execution trends and failure rates." />
+  <Card href="/docs/api/workflows" title="Workflow API" description="Manage workflows programmatically via REST API." />
+</Cards>

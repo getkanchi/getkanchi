@@ -32,14 +32,14 @@ export function BorderBeam({
       }
       className={cn(
         "pointer-events-none absolute inset-0 rounded-lg",
-        className
+        className,
       )}
     >
       <div
         className={cn(
           "absolute inset-0 rounded-lg",
           "bg-gradient-to-r from-[var(--color-from)] to-[var(--color-to)]",
-          "opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          "opacity-0 transition-opacity duration-500 group-hover:opacity-100",
         )}
         style={{
           padding: "1px",

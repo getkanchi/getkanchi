@@ -1,0 +1,178 @@
+---
+title: Worker Health Monitoring
+description: Track worker status, heartbeats, and performance in real-time.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+Kanchi monitors worker health through Celery's heartbeat events. See which workers are active, idle, or missing—and track task distribution across your worker pool.
+
+## How it works
+
+Celery workers emit heartbeat events at regular intervals (default: every 2 seconds). Kanchi listens for these events and maintains a live registry of worker status.
+
+```
+Celery Worker → Heartbeat Event → Message Broker → Kanchi → Dashboard
+```
+
+When a worker stops sending heartbeats, Kanchi marks it as offline after a configurable timeout period.
+
+## Worker states
+
+**Active**
+- Received heartbeat within the last 30 seconds
+- Currently processing or ready to accept tasks
+- Shown with green status indicator
+
+**Idle**
+- Connected and sending heartbeats
+- No tasks currently executing
+- Available to accept new work
+
+**Offline**
+- No heartbeat received for > 30 seconds
+- May have crashed, been terminated, or lost network connectivity
+- Shown with red status indicator
+- Tasks running on this worker may be orphaned
+
+**Unknown**
+- Worker was detected but insufficient data available
+- Typically occurs on first connection before heartbeat interval elapses
+
+## Worker dashboard
+
+The worker dashboard shows:
+
+- **Total worker count** across all queues
+- **Active vs. offline workers** with real-time status
+- **Task distribution** showing which workers are handling the most load
+- **Queue assignments** for each worker
+- **Last heartbeat timestamp** for each worker
+- **Hostname and process information**
+
+<Callout>
+Worker health data is ephemeral — it reflects the current state based on recent heartbeats. Historical worker metrics are not persisted.
+</Callout>
+
+## Heartbeat configuration
+
+Control heartbeat intervals in your Celery configuration:
+
+```python
+# Celery worker configuration
+from celery import Celery
+
+app = Celery('tasks', broker='redis://localhost:6379/0')
+
+# Heartbeat interval (seconds)
+app.conf.worker_send_task_events = True  # Enable task events
+app.conf.worker_heartbeat_interval = 2   # Send heartbeat every 2 seconds (default)
+```
+
+**Tradeoffs:**
+- **Lower intervals** (1-2s): More accurate worker status, higher network overhead
+- **Higher intervals** (5-10s): Less network traffic, slower detection of offline workers
+
+<Callout type="warn">
+If you increase `worker_heartbeat_interval` above 30 seconds, adjust Kanchi's offline detection threshold accordingly. Otherwise, healthy workers may be incorrectly marked as offline.
+</Callout>
+
+## Orphan detection integration
+
+When a worker goes offline, Kanchi checks for tasks that were running on that worker. If tasks were in `STARTED` state and never completed, they're flagged as orphans.
+
+This automatic detection prevents tasks from silently failing when workers crash mid-execution.
+
+<Cards className="mt-6">
+  <Card href="/docs/core/orphan-detection" title="Orphan Detection" description="Learn how Kanchi identifies and recovers abandoned tasks." />
+  <Card href="/docs/core/workflow-automation" title="Workflows" description="Automate responses when workers go offline." />
+</Cards>
+
+## Debugging worker issues
+
+### Worker not appearing in dashboard
+
+**Check event broadcasting:**
+
+```python
+# Ensure workers have events enabled
+app.conf.worker_send_task_events = True
+```
+
+Or start workers with the `-E` flag:
+
+```bash
+celery -A your_app worker -E
+```
+
+**Check broker connection:**
+
+Verify workers are connected to the same broker that Kanchi is monitoring:
+
+```bash
+# In worker logs, look for:
+# [INFO] Connected to amqp://guest:**@localhost:5672//
+```
+
+### Worker showing as offline but is running
+
+**Check heartbeat interval:**
+
+If your workers use a custom heartbeat interval > 30 seconds, Kanchi may mark them offline prematurely.
+
+**Network issues:**
+
+Heartbeat events may be delayed or lost due to network latency or broker load. Check broker logs for connection issues.
+
+### Inconsistent worker count
+
+**Auto-scaling:**
+
+If your workers auto-scale (e.g., Kubernetes HPA), worker count will fluctuate. This is expected behavior.
+
+**Stale workers:**
+
+Workers that shut down gracefully send a disconnect event. Workers that crash may remain in the registry until the offline timeout elapses.
+
+## Best practices
+
+**Name your workers semantically:**
+
+```bash
+# Use descriptive hostnames
+celery -A tasks worker -n email-worker@%h -Q email
+
+# Instead of generic names
+celery -A tasks worker  # Defaults to celery@hostname
+```
+
+**Monitor worker queues:**
+
+Ensure workers are consuming from the correct queues. Kanchi shows queue assignments for each worker.
+
+**Set appropriate heartbeat intervals:**
+
+For production environments with stable workers, 2-5 seconds works well. For environments with frequent worker restarts, consider 1-2 seconds for faster detection.
+
+**Alert on worker offline events:**
+
+Use Kanchi's workflow automation to send Slack notifications when workers go offline:
+
+```yaml
+# Example workflow configuration
+trigger:
+  event: worker.offline
+action:
+  type: slack
+  webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK
+  message: "Worker {worker_name} went offline at {timestamp}"
+```
+
+## Next steps
+
+<Cards className="mt-6">
+  <Card href="/docs/core/orphan-detection" title="Orphan Detection" description="Understand how orphaned tasks are identified and recovered." />
+  <Card href="/docs/features/analytics" title="Analytics" description="Analyze worker utilization and task distribution patterns." />
+  <Card href="/docs/deployment/scaling" title="Scaling Workers" description="Best practices for scaling Celery workers in production." />
+</Cards>

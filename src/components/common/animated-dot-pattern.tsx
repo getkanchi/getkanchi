@@ -1,6 +1,6 @@
-"use client"
-import { cn } from "@/lib/utils"
-import { DotPattern } from "@/components/ui/dot-pattern"
+"use client";
+import { cn } from "@/lib/utils";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 export function DotPatternWithGlowEffect() {
   return (
@@ -10,9 +10,9 @@ export function DotPatternWithGlowEffect() {
         height={32}
         glow={true}
         className={cn(
-          "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
+          "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
         )}
       />
     </div>
-  )
+  );
 }

@@ -1,14 +1,16 @@
 @import "tailwindcss";
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";
 
 @plugin "@tailwindcss/typography";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
-
+#nd-docs-layout.prose a,
+#nd-docs-layout .prose a {
+    text-decoration: none;
+  }
 /* =============================================================================
    SHADCN COLORS - Light and Dark Mode
    ============================================================================= */
@@ -17,12 +19,12 @@
     --background: hsl(0 0% 100%);
     --surface: hsl(0 0% 98.8%);
     --raised: hsl(0 0% 97.6%);
-    --foreground: hsl(222.2 47.4% 11.2%);
+    --foreground: hsl(222, 62%, 4%);
     --card: hsl(0 0% 100%);
     --card-foreground: hsl(222.2 47.4% 11.2%);
     --popover: hsl(0 0% 100%);
     --popover-foreground: hsl(222.2 47.4% 11.2%);
-    --primary: hsl(158, 70%, 45%);
+    --primary: hsl(158 70% 45%);
     --primary-foreground: hsl(210 40% 98%);
     --secondary: hsl(210 40% 96.1%);
     --secondary-foreground: hsl(222.2 47.4% 11.2%);
@@ -32,34 +34,72 @@
     --accent-foreground: hsl(222.2 47.4% 11.2%);
     --destructive: hsl(0 84.2% 60.2%);
     --destructive-foreground: hsl(210 40% 98%);
-    --border: hsl(214.3 31.8% 91.4%);
+    --border: hsl(214, 25%, 11%);
     --input: hsl(214.3 31.8% 91.4%);
     --ring: hsl(222.2 84% 4.9%);
     --radius: 0.5rem;
+
+    /* Map Kanchi palette to Fumadocs design tokens */
+    --color-fd-background: var(--background);
+    --color-fd-foreground: var(--foreground);
+    --color-fd-muted: var(--accent-foreground);
+    --color-fd-muted-foreground: var(--muted-foreground);
+    --color-fd-popover: var(--popover);
+    --color-fd-popover-foreground: var(--popover-foreground);
+    --color-fd-card: var(--card);
+    --color-fd-card-foreground: var(--card-foreground);
+    --color-fd-border: var(--border);
+    --color-fd-primary: var(--primary);
+    --color-fd-primary-foreground: var(--primary-foreground);
+    --color-fd-secondary: var(--card);
+    --color-fd-secondary-foreground: var(--card-foreground);
+    --color-fd-accent: var(--accent);
+    --color-fd-accent-foreground: var(--accent-foreground);
+    --color-fd-ring: var(--ring);
+
+
   }
 
   .dark {
-    --background: hsl(0, 0%, 0%);
-    --surface: hsl(0, 0%, 5%);
-    --raised: hsl(0, 0%, 10%);
-    --foreground: hsl(210 40% 98%);
-    --card: hsl(210, 20%, 4%);
+    --background: hsl(0 0% 0%);
+    --surface: hsl(0 0% 5%);
+    --raised: hsl(0 0% 10%);
+    --foreground: hsl(240, 2%, 90%);
+    --card: hsl(210 20% 4%);
     --card-foreground: hsl(210 40% 98%);
     --popover: hsl(222.2 84% 4.9%);
     --popover-foreground: hsl(210 40% 98%);
-    --primary: hsl(158, 70%, 45%);
-    --primary-foreground: hsl(220, 43%, 3%);
-    --secondary: hsl(217, 71%, 38%);
+    --primary: hsl(158 70% 45%);
+    --primary-foreground: hsl(220 43% 3%);
+    --secondary: hsl(217 71% 38%);
     --secondary-foreground: hsl(210 40% 98%);
-    --muted: hsl(240, 1%, 55%);
-    --muted-foreground: hsl(0, 0%, 76%);
-    --accent: hsl(219, 21%, 16%);
-    --accent-foreground: hsl(210 40% 98%);
+    --muted: hsl(240 1% 55%);
+    --muted-foreground: hsl(0 0% 76%);
+    --accent: hsl(219 21% 16%);
+    --accent-foreground: hsl(141, 54%, 10%);
     --destructive: hsl(0 62.8% 30.6%);
     --destructive-foreground: hsl(210 40% 98%);
-    --border: hsl(220, 11%, 15%);
-    --input: hsl(217, 34%, 15%);
+    --border: hsl(220 11% 15%);
+    --input: hsl(217 34% 15%);
     --ring: hsl(212.7 26.8% 83.9%);
+
+    --color-fd-background: var(--background);
+    --color-fd-foreground: var(--foreground);
+    --color-fd-muted: var(--accent-foreground);
+    --color-fd-muted-foreground: var(--muted-foreground);
+    --color-fd-popover: var(--popover);
+    --color-fd-popover-foreground: var(--popover-foreground);
+    --color-fd-card: var(--card);
+    --color-fd-card-foreground: var(--card-foreground);
+    --color-fd-border: var(--border);
+    --color-fd-primary: var(--primary);
+    --color-fd-primary-foreground: var(--primary-foreground);
+    --color-fd-secondary: var(--card);
+    --color-fd-secondary-foreground: var(--card-foreground);
+    --color-fd-accent: var(--accent);
+    --color-fd-accent-foreground: var(--accent-foreground);
+    --color-fd-ring: var(--ring);
+
   }
 }
 
@@ -76,6 +116,7 @@
   --color-error: hsl(347 77% 60%);
   --color-warning: hsl(45 85% 65%);
   --color-info: hsl(199 89% 58%);
+
 }
 
 /* =============================================================================
@@ -91,29 +132,86 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+
+  #nd-sidebar,
+  #nd-sidebar-mobile {
+    --color-fd-background: var(--surface);
+    --color-fd-card: var(--surface);
+    --color-fd-card-foreground: var(--foreground);
+    --color-fd-muted: var(--card-foreground);
+    --color-fd-muted-foreground: var(--muted-foreground);
+    --color-fd-border: hsl(220 13% 18%);
+    --color-fd-ring: hsl(220 13% 18%);
+    --color-fd-accent: hsl(var(--accent) / 45%);
+    --color-fd-accent-foreground: var(--accent-foreground);
+    --color-fd-popover: var(--surface);
+    --color-fd-popover-foreground: var(--foreground);
+    --color-fd-secondary: var(--raised);
+    --color-fd-secondary-foreground: var(--foreground);
+    background-color: hsl(var(--surface));
+    color: hsl(var(--muted-foreground));
+  }
+
+  #nd-sidebar :is(.bg-fd-card, .bg-fd-background),
+  #nd-sidebar-mobile :is(.bg-fd-card, .bg-fd-background) {
+    background-color: hsl(var(--surface));
+  }
+
+  #nd-sidebar :is(.border, .border-b, .border-s, .border-e, .border-t),
+  #nd-sidebar-mobile :is(.border, .border-b, .border-s, .border-e, .border-t) {
+    border-color: hsl(220 13% 18%);
+  }
+
+  /* Callout border color */
+  #nd-docs-layout [style*="--callout-color"] {
+    border-color: hsl(220 13% 18%);
+  }
+
+  #nd-docs-layout [data-card] {
+    border-color: hsl(220 11% 15% / 0.55);
+    background-color: hsl(var(--surface));
+  }
+
+  #nd-docs-layout [data-card]:hover {
+    border-color: hsl(158 70% 45% / 0.65);
+    background-color: hsl(var(--surface) / 0.92);
+  }
+
+  #nd-docs-layout :is(code, kbd) {
+    border-color: hsl(220 11% 15% / 0.55);
+    background-color: hsl(var(--surface) / 0.92);
+    color: hsl(var(--foreground));
+  }
+
+  #nd-docs-layout :is(.border-fd-border, .border-fd-muted) {
+    border-color: hsl(220 11% 15% / 0.55);
+  }
 }
 
 @theme inline {
-  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite
+    alternate;
   --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
 
   @keyframes shimmer-slide {
-  to {
-    transform: translate(calc(100cqw - 100%), 0);
+    to {
+      transform: translate(calc(100cqw - 100%), 0);
     }
   }
   @keyframes spin-around {
-  0% {
-    transform: translateZ(0) rotate(0);
+    0% {
+      transform: translateZ(0) rotate(0);
     }
-  15%, 35% {
-    transform: translateZ(0) rotate(90deg);
+    15%,
+    35% {
+      transform: translateZ(0) rotate(90deg);
     }
-  65%, 85% {
-    transform: translateZ(0) rotate(270deg);
+    65%,
+    85% {
+      transform: translateZ(0) rotate(270deg);
     }
-  100% {
-    transform: translateZ(0) rotate(360deg);
+    100% {
+      transform: translateZ(0) rotate(360deg);
     }
   }
 }
@@ -142,5 +240,4 @@
   --color-card: var(--card);
   --color-popover: var(--popover);
   --color-input: var(--input);
-
 }

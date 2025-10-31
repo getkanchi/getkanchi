@@ -1,0 +1,62 @@
+---
+title: Introduction
+description: Real-time Celery monitoring that doesn't make you want to quit.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+Kanchi is a real-time monitoring system for Celery that bridges the gap between distributed task processing and the developers who need to understand what's happening. If you've spent years squinting at logs or refreshing Flower tabs, this one's for you.
+
+## What Kanchi does
+
+Kanchi connects directly to your message broker — no agents, no SDK changes — and gives you real-time visibility into task execution. Tasks, workers, retries, failures, everything you need to debug issues and prevent outages.
+
+**Real-time monitoring**
+- Live task execution tracking via WebSocket connections
+- Instant status updates as tasks transition through states
+- Automatic connection recovery with minimal latency
+- Worker health monitoring with heartbeat tracking
+
+**Advanced task management**
+- Multi-dimensional filtering: status, date range, task name, worker, queue
+- Full-text search across task names and metadata
+- Detailed retry tracking with parent-child task relationships
+- Orphan detection to identify incomplete or abandoned tasks
+- Task execution history with complete audit trails
+
+**Workflow automation**
+- Event-driven actions that respond to task failures
+- Circuit breaker protection to prevent infinite retry loops
+- Slack integration for notifications
+- Pre-built workflow templates for common scenarios
+
+**Analytics and insights**
+- Daily task statistics aggregated by status
+- Historical trend analysis
+- Worker utilization metrics
+- Task failure rate tracking
+- Performance bottleneck identification
+
+<Callout type="info">
+Kanchi is **broker-agnostic**. It works with both RabbitMQ and Redis message brokers, so you can use whichever fits your stack.
+</Callout>
+
+## Who Kanchi is for
+
+Kanchi is built for developers and DevOps teams who need intuitive visibility into distributed systems without the operational overhead of traditional monitoring solutions.
+
+You'll appreciate Kanchi if you:
+- Run Celery workers in production and need real-time task visibility
+- Spend time debugging failed tasks or orphaned jobs
+- Want automated responses to task failures without writing custom code
+- Need historical task data for performance analysis
+- Value developer experience and intuitive interfaces
+
+## Next steps
+
+<Cards className="mt-6">
+  <Card href="/docs/getting-started/quickstart" title="Quickstart" description="Run Kanchi locally in under 5 minutes." />
+  <Card href="/docs/getting-started/installation" title="Installation" description="Deploy Kanchi with Docker or install locally for development." />
+  <Card href="/docs/core/architecture" title="Architecture" description="Understand how Kanchi monitors your Celery infrastructure." />
+</Cards>

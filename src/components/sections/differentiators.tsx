@@ -115,27 +115,39 @@ export function DifferentiatorsSection() {
                   </div>
                   <div className="p-4 font-mono text-xs space-y-1 overflow-x-auto max-w-full">
                     <div className="flex gap-4">
-                      <span className="text-muted-foreground select-none">1</span>
+                      <span className="text-muted-foreground select-none">
+                        1
+                      </span>
                       <span className="text-special">services:</span>
                     </div>
                     <div className="flex gap-4">
-                      <span className="text-muted-foreground select-none">2</span>
+                      <span className="text-muted-foreground select-none">
+                        2
+                      </span>
                       <span className="text-info ml-4">kanchi:</span>
                     </div>
                     <div className="flex gap-4">
-                      <span className="text-muted-foreground select-none">3</span>
+                      <span className="text-muted-foreground select-none">
+                        3
+                      </span>
                       <span className="text-muted-foreground ml-8">
-                        image: <span className="text-success">getkanchi/kanchi</span>
+                        image:{" "}
+                        <span className="text-success">getkanchi/kanchi</span>
                       </span>
                     </div>
                     <div className="flex gap-4">
-                      <span className="text-muted-foreground select-none">4</span>
+                      <span className="text-muted-foreground select-none">
+                        4
+                      </span>
                       <span className="text-muted-foreground ml-8">
-                        ports: <span className="text-warning">["8000:8000"]</span>
+                        ports:{" "}
+                        <span className="text-warning">["8000:8000"]</span>
                       </span>
                     </div>
                     <div className="flex gap-4">
-                      <span className="text-muted-foreground select-none">5</span>
+                      <span className="text-muted-foreground select-none">
+                        5
+                      </span>
                       <span className="text-success ml-8"># Done!</span>
                     </div>
                   </div>
@@ -173,7 +185,9 @@ export function DifferentiatorsSection() {
               <div className="p-6 rounded-lg border border-border bg-card/30 backdrop-blur-sm space-y-3">
                 <div className="flex items-center gap-2">
                   <Code2 className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold">Production Ready</span>
+                  <span className="text-sm font-semibold">
+                    Production Ready
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                   <div className="text-muted">✓ Connection Pooling</div>

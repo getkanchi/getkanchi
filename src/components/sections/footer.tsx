@@ -24,7 +24,11 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <img src={'/logo_kanchi.svg'} alt="Kanchi Logo" className="h-8 w-8" />
+              <img
+                src={"/logo_kanchi.svg"}
+                alt="Kanchi Logo"
+                className="h-8 w-8"
+              />
               <span className="font-display font-bold text-xl">Kanchi</span>
             </div>
             <p className="text-sm text-muted">
@@ -57,7 +61,10 @@ export function Footer() {
             <h4 className="font-display font-semibold">Product</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="/changelog" className="text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href="/changelog"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   Changelog
                 </a>
               </li>
@@ -69,7 +76,12 @@ export function Footer() {
             <h4 className="font-display font-semibold">Resources</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="https://github.com/getkanchi/kanchi" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href="https://github.com/getkanchi/kanchi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   GitHub
                 </a>
               </li>
@@ -81,7 +93,12 @@ export function Footer() {
             <h4 className="font-display font-semibold">Company</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="https://github.com/getkanchi/kanchi" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href="https://github.com/getkanchi/kanchi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   GitHub
                 </a>
               </li>

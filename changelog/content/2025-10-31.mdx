@@ -1,0 +1,191 @@
+---
+title: "Authentication and access control"
+description: "Secure your Kanchi instance with OAuth, basic auth, or both—completely optional"
+date: "2025-10-31"
+version: "1.3.0"
+tags: ["Feature", "Security"]
+---
+
+Kanchi now supports authentication. If you need to restrict access to your monitoring dashboard, you can enable login with Google, GitHub, or basic username/password authentication.
+
+This is entirely opt-in. If you don't enable it, Kanchi works exactly as before — open access, zero friction. But when you need security, it's there.
+
+## Why we built this
+
+Some deployments need authentication. Maybe you're exposing Kanchi to the internet. Maybe your infrastructure requires access control. Maybe you just don't want everyone on the network poking around production task queues.
+
+We wanted authentication that doesn't get in the way when you don't need it, but provides proper security when you do.
+
+## How it works
+
+### OAuth providers
+Login with Google or GitHub. Configure client credentials, set allowed email patterns, and you're done. Kanchi handles the OAuth flow, validates emails against your domain allowlist, and maintains sessions with refresh tokens.
+
+Both providers support profile pictures and metadata — so your team members show up in the UI with their actual names and avatars instead of anonymous sessions.
+
+### Basic authentication
+For simpler setups, use username and password authentication. Passwords are hashed with PBKDF2-SHA256 (260,000 iterations, unique salt per password). No plaintext secrets in the database.
+
+Useful for internal deployments where you don't want to configure OAuth apps but still need basic access control.
+
+### Email-based access control
+Restrict access by email pattern. Use wildcards to allow entire domains or specify individual addresses:
+
+```bash
+# Allow specific domain
+ALLOWED_EMAIL_PATTERNS='*@example.com'
+
+# Multiple domains
+ALLOWED_EMAIL_PATTERNS='*@example.com,*@example.org'
+
+# Specific addresses
+ALLOWED_EMAIL_PATTERNS='admin@example.com,ops@company.io'
+```
+
+Emails are normalized (lowercased) and validated before access is granted. If someone authenticates with an email that doesn't match your patterns, they're denied — even if OAuth succeeds.
+
+### Token-based sessions
+Authentication uses short-lived access tokens (30 minutes) and long-lived refresh tokens (24 hours). Tokens are signed with HMAC-SHA256 and validated on every request.
+
+The system stores SHA256 hashes of tokens in the database — never the tokens themselves. Even if someone compromises the database, they can't reconstruct valid tokens.
+
+Tokens automatically refresh when they expire. The frontend handles this transparently, so sessions don't drop while you're actively using the dashboard.
+
+### WebSocket authentication
+WebSocket connections require valid access tokens when authentication is enabled. The token is passed via query parameter during connection initialization — no manual header management needed.
+
+If a token expires mid-session, the connection closes gracefully and the frontend reconnects with a refreshed token automatically.
+
+## Configuration
+
+Authentication is disabled by default. Enable it with a single environment variable:
+
+```bash
+AUTH_ENABLED=true
+```
+
+Then configure at least one authentication method:
+
+**Basic authentication:**
+```bash
+AUTH_BASIC_ENABLED=true
+BASIC_AUTH_USERNAME=kanchi-admin
+BASIC_AUTH_PASSWORD_HASH='pbkdf2_sha256$260000$...'
+```
+
+**Google OAuth:**
+```bash
+AUTH_GOOGLE_ENABLED=true
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+OAUTH_REDIRECT_BASE_URL=https://kanchi.example.com
+```
+
+**GitHub OAuth:**
+```bash
+AUTH_GITHUB_ENABLED=true
+GITHUB_CLIENT_ID=your-client-id
+GITHUB_CLIENT_SECRET=your-client-secret
+OAUTH_REDIRECT_BASE_URL=https://kanchi.example.com
+```
+
+You can enable multiple methods simultaneously. Users will see all available login options on the login page and can choose their preferred method.
+
+**Security settings:**
+```bash
+# Generate secure secrets (required)
+SESSION_SECRET_KEY=$(openssl rand -hex 32)
+TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+
+# Configure CORS
+ALLOWED_ORIGINS='https://kanchi.example.com'
+ALLOWED_HOSTS='kanchi.example.com'
+
+# Restrict access by email
+ALLOWED_EMAIL_PATTERNS='*@example.com'
+```
+
+<Accordion type="single" collapsible className="w-full not-prose">
+  <AccordionItem value="password-hash">
+    <AccordionTrigger>Generating password hashes</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <p>For production deployments, always use hashed passwords — never plaintext. Generate a PBKDF2-SHA256 hash with this Python script:</p>
+      ```bash
+      python - <<'PY'
+      import os, base64, hashlib
+
+      password = os.environ.get('KANCHI_PASSWORD', 'change-me').encode('utf-8')
+      salt = base64.b64encode(os.urandom(16)).decode('ascii').strip('=')
+      iterations = 260000
+      dk = hashlib.pbkdf2_hmac('sha256', password, salt.encode('utf-8'), iterations)
+      print(f"pbkdf2_sha256${iterations}${salt}${base64.b64encode(dk).decode('ascii')}")
+      PY
+      ```
+      <p>Set your password as an environment variable before running:</p>
+      ```bash
+      export KANCHI_PASSWORD='your-secure-password'
+      ```
+      <p>Then use the output hash in your <code>BASIC_AUTH_PASSWORD_HASH</code> configuration.</p>
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="oauth-setup">
+    <AccordionTrigger>OAuth configuration</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <p><strong>Google OAuth setup</strong></p>
+      <ol className="list-decimal space-y-2 pl-4">
+        <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+        <li>Create or select a project</li>
+        <li>Navigate to APIs & Services → Credentials</li>
+        <li>Create OAuth 2.0 Client ID (Web application)</li>
+        <li>Set authorized redirect URI: <code>https://your-domain.com/api/auth/oauth/google/callback</code></li>
+        <li>Copy Client ID and Client Secret</li>
+      </ol>
+
+      <p><strong>GitHub OAuth setup</strong></p>
+      <ol className="list-decimal space-y-2 pl-4">
+        <li>Go to <a href="https://github.com/settings/developers" target="_blank">GitHub Settings → Developer settings</a></li>
+        <li>Create New OAuth App</li>
+        <li>Set Homepage URL: <code>https://your-domain.com</code></li>
+        <li>Set Authorization callback URL: <code>https://your-domain.com/api/auth/oauth/github/callback</code></li>
+        <li>Copy Client ID and generate Client Secret</li>
+      </ol>
+
+      <p>The redirect URI must match your <code>OAUTH_REDIRECT_BASE_URL</code> plus the provider-specific callback path.</p>
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+## What changed
+
+### Backend
+New `/api/auth/*` endpoints for login, logout, token refresh, and OAuth flows. All other API routes now check for authentication when `AUTH_ENABLED=true`.
+
+Two new database tables: `users` (stores authenticated user profiles) and extensions to `user_sessions` (links sessions to users and stores token hashes).
+
+Migrations run automatically on startup — no manual schema changes needed.
+
+### Frontend
+New login page at `/login` with OAuth buttons and basic auth form. Navigation middleware redirects unauthenticated users to the login page when auth is enabled.
+
+User avatar dropdown in the navbar shows current user info and logout button. Tokens are stored in `localStorage` and automatically refreshed before expiration.
+
+WebSocket connections include access tokens when auth is enabled. If a connection is rejected due to invalid auth, the frontend handles it gracefully and prompts for re-authentication.
+
+## Backward compatibility
+
+If you don't enable authentication, nothing changes. Existing deployments continue working without modification.
+
+Anonymous sessions are still supported when `AUTH_ENABLED=false`. The new database tables exist but remain empty.
+
+## Bug fixes
+
+**Workflow deletion issue**
+Fixed a bug where deleting workflows would sometimes fail silently or leave orphaned records. Deletion now properly cascades through related workflow executions and action configurations.
+
+---
+
+For detailed setup instructions, OAuth configuration, troubleshooting, and production deployment guidelines, check out the [Authentication documentation](/docs/configuration/authentication).
+
+Built for teams that need security without the ceremony. Enable it when you need it, ignore it when you don't. Happy Halloween! 🎃
+
+If you run into issues or have questions, open an issue on GitHub — we're here to help.

@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { Github, Menu } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import {
@@ -20,17 +20,26 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 export function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-      <div className="container mx-auto px-4 h-12 flex items-center justify-between">
+    <header className="fixed inset-x-0 top-0 z-50 w-full border-b border-border/70 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/65">
+      <div className="container mx-auto flex h-12 items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-display font-bold text-xl">
-          <img src="/logo_kanchi.svg" alt="Kanchi Logo" className="h-5 w-5" /> Kanchi
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-display font-bold text-xl"
+        >
+          <Image
+            src="/logo_kanchi.svg"
+            alt="Kanchi Logo"
+            width={20}
+            height={20}
+            priority
+          />{" "}
+          Kanchi
         </Link>
 
         {/* Desktop Navigation */}
@@ -38,28 +47,45 @@ export function Header() {
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/" className={cn(navigationMenuTriggerStyle(), 'hover:text-foreground')}>
+                <Link
+                  href="/"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "hover:text-foreground",
+                  )}
+                >
                   Home
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {/* <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link href="/docs" className={cn(navigationMenuTriggerStyle(), 'hover:text-foreground')}>
-                  Documentation
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem> */}
-
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/changelog" className={cn(navigationMenuTriggerStyle(), 'hover:text-foreground')}>
-                  Changelog
+                <Link
+                  href="/docs"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "hover:text-foreground",
+                  )}
+                >
+                  Documentation
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/changelog"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "hover:text-foreground",
+                  )}
+                >
+                  Changelog
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -80,7 +106,13 @@ export function Header() {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2 font-display">
-                  <img src="/logo_kanchi.svg" alt="Kanchi Logo" className="h-6 w-6" />
+                  <Image
+                    src="/logo_kanchi.svg"
+                    alt="Kanchi Logo"
+                    width={24}
+                    height={24}
+                    priority
+                  />
                   Kanchi
                 </SheetTitle>
               </SheetHeader>
@@ -92,13 +124,13 @@ export function Header() {
                 >
                   Home
                 </Link>
-                {/* <Link
+                <Link
                   href="/docs"
                   className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setOpen(false)}
                 >
                   Documentation
-                </Link> */}
+                </Link>
                 <Link
                   href="/changelog"
                   className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -137,44 +169,8 @@ export function Header() {
               <Github className="w-5 h-5" />
             </a>
           </Button>
-          {/* <Button size="sm" variant={'ghost'} className="hidden sm:flex">
-            Get Started
-          </Button> */}
         </div>
       </div>
     </header>
   );
 }
-
-const ListItem = ({
-  className,
-  title,
-  children,
-  href,
-  ...props
-}: {
-  className?: string;
-  title: string;
-  children: React.ReactNode;
-  href: string;
-}) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          href={href}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
-  );
-};

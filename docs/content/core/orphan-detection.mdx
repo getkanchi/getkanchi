@@ -1,0 +1,184 @@
+---
+title: Orphan Detection
+description: Automatic detection and recovery of orphaned Celery tasks
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Card, Cards } from 'fumadocs-ui/components/card';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+## What are Orphaned Tasks?
+
+An orphaned task occurs when a Celery worker crashes or is terminated while executing a task. The task remains in a "running" state indefinitely, but will never complete because the worker is gone.
+
+## The Problem
+
+Without orphan detection:
+- Tasks stuck in "running" state forever
+- No automatic recovery mechanism
+- Manual intervention required to identify and retry
+- Loss of visibility into task failures
+
+## How Kanchi Solves This
+
+Kanchi is the **only Celery monitoring tool** with automatic orphan detection built-in.
+
+### Detection Algorithm
+
+1. **Worker Heartbeat Monitoring**
+   - Tracks worker online/offline events
+   - Maintains real-time worker status
+
+2. **Task State Tracking**
+   - Monitors all running tasks per worker
+   - Cross-references with worker health
+
+3. **Grace Period**
+   - Waits for late-arriving completion events
+   - Configurable timeout (default: 60 seconds)
+
+4. **Automatic Marking**
+   - Tasks marked as orphaned when worker goes offline
+   - Visual indicators in the dashboard
+
+## Features
+
+### Automatic Detection
+
+Tasks are automatically detected as orphaned when:
+- Worker goes offline while task is running
+- No completion event received within grace period
+- Worker fails to send heartbeats
+
+```python
+# No code changes needed!
+# Kanchi automatically detects orphaned tasks
+```
+
+### One-Click Retry
+
+Retry orphaned tasks with original parameters:
+
+- Original arguments and kwargs preserved
+- Retry chain tracking
+- Visual parent to child relationships
+
+### Retry Chain Visualization
+
+See the full retry hierarchy:
+
+```
+original_task (orphaned)
+  └─> retry_1 (succeeded)
+```
+
+## Dashboard Views
+
+### Orphaned Tasks View
+
+Filter to see only orphaned tasks with clear visual indicators showing:
+
+- **Status Badge**: Clear "ORPHANED" indicator
+- **Worker Info**: Which worker was running the task
+- **Retry Button**: One-click retry
+- **Original Args**: View original parameters
+
+## Workflow Automation
+
+Automate orphan recovery with workflow rules:
+
+```yaml
+# Automatic retry for orphaned tasks
+rule:
+  name: "Auto-retry orphaned critical tasks"
+  trigger:
+    event: "task.orphaned"
+    filters:
+      - field: "task.name"
+        operator: "contains"
+        value: "critical"
+  actions:
+    - type: "retry"
+      delay: 60  # Wait 1 minute before retry
+```
+
+<Card href="/docs/core/workflow-automation" title="Workflow Automation" description="Learn more about automating orphan recovery" />
+
+## API Access
+
+Query orphaned tasks via API:
+
+```bash
+curl -X GET "http://localhost:8000/api/tasks?status=orphaned"
+```
+
+Response:
+
+```json
+{
+  "tasks": [
+    {
+      "task_id": "abc-123",
+      "name": "process_data",
+      "status": "orphaned",
+      "worker": "worker-1",
+      "orphaned_at": "2025-01-15T10:30:00Z",
+      "can_retry": true
+    }
+  ]
+}
+```
+
+## Statistics
+
+Track orphan rates over time:
+
+- Daily orphan count
+- Orphan rate by task type
+- Worker failure patterns
+- Recovery success rate
+
+<Card href="/docs/features/analytics" title="Analytics" description="View orphan detection analytics" />
+
+## Best Practices
+
+<Accordions>
+  <Accordion title="Set appropriate grace periods">
+    Balance between quick detection and avoiding false positives:
+    - Fast tasks: 30-60 seconds
+    - Long-running tasks: 2-5 minutes
+  </Accordion>
+
+  <Accordion title="Monitor worker health">
+    Prevent orphans by maintaining healthy workers:
+    - Set up proper monitoring
+    - Use health checks
+    - Implement graceful shutdown
+  </Accordion>
+
+  <Accordion title="Automate recovery">
+    Use workflow automation for critical tasks:
+    - Auto-retry important tasks
+    - Send alerts for failures
+    - Track retry success rates
+  </Accordion>
+</Accordions>
+
+## Limitations
+
+<Callout type="warn">
+Orphan detection requires workers to send events. Ensure `worker_send_task_events` is enabled in your Celery configuration.
+</Callout>
+
+```python
+# Enable task events
+app.conf.worker_send_task_events = True
+app.conf.task_send_sent_event = True
+```
+
+## Next Steps
+
+<Cards>
+  <Card href="/docs/core/worker-health" title="Worker Health Monitoring" description="Monitor worker health to prevent orphans" />
+  <Card href="/docs/core/workflow-automation" title="Workflow Automation" description="Automate orphan recovery" />
+</Cards>

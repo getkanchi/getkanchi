@@ -12,7 +12,7 @@ export const BentoGrid = ({
     <div
       className={cn(
         "grid w-full auto-rows-[22rem] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
-        className
+        className,
       )}
     >
       {children}
@@ -43,13 +43,11 @@ export const BentoCard = ({
       "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl",
       "bg-card border border-border",
       "transform-gpu transition-all duration-300 ease-out hover:scale-[1.01]",
-      className
+      className,
     )}
   >
     {/* Background animation area - full visibility */}
-    <div className="absolute inset-0 z-0">
-      {background}
-    </div>
+    <div className="absolute inset-0 z-0">{background}</div>
 
     {/* Compact content area at bottom - minimal height */}
     <div className="relative z-20 mt-auto">
@@ -60,7 +58,9 @@ export const BentoCard = ({
             <h3 className="text-sm font-bold font-display text-foreground leading-tight mb-0.5">
               {name}
             </h3>
-            <p className="text-[11px] text-muted-foreground leading-snug line-clamp-2">{description}</p>
+            <p className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
+              {description}
+            </p>
           </div>
         </div>
 

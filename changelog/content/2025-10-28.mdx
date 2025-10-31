@@ -6,7 +6,7 @@ version: "1.2.0"
 tags: ["Feature", "Configuration"]
 ---
 
-Kanchi now supports Redis as an alternative message broker. If you're already running Redis or prefer it over RabbitMQ, you can use it directly—no changes to your Celery configuration needed.
+Kanchi now supports Redis as an alternative message broker. If you're already running Redis or prefer it over RabbitMQ, you can use it directly — no changes to your Celery configuration needed.
 
 ## Why this matters
 
@@ -37,7 +37,7 @@ If you're upgrading from v1.1.0 or earlier, the environment variable name has ch
 **Old:** `RABBITMQ_URL`
 **New:** `CELERY_BROKER_URL`
 
-The new name reflects that Kanchi supports multiple broker types. Your existing RabbitMQ connection will work—just rename the environment variable.
+The new name reflects that Kanchi supports multiple broker types. Your existing RabbitMQ connection will work — just rename the environment variable.
 
 <Accordion type="single" collapsible className="w-full not-prose">
   <AccordionItem value="migration">
@@ -70,11 +70,11 @@ The new name reflects that Kanchi supports multiple broker types. Your existing 
       ```
 
       <p><strong>Switching from RabbitMQ to Redis</strong></p>
-      <p>If you want to switch brokers, you'll also need to update your Celery workers to use the same Redis URL. Kanchi reads events from the broker - your Celery application must be configured to publish to the same broker for monitoring to work.</p>
+      <p>If you want to switch brokers, you'll also need to update your Celery workers to use the same Redis URL. Kanchi reads events from the broker — your Celery application must be configured to publish to the same broker for monitoring to work.</p>
     </AccordionContent>
   </AccordionItem>
 </Accordion>
 
 ---
 
-That's the update. Broker flexibility without the complexity. If you hit any issues, open an issue on GitHub - we are always happy to help. Happy monitoring!
+That's the update. Broker flexibility without the complexity. If you hit any issues, open an issue on GitHub — we are always happy to help. Happy monitoring!

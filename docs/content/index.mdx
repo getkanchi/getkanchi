@@ -1,0 +1,92 @@
+---
+title: Welcome to Kanchi
+description: Real-time Celery monitoring that doesn't make you want to quit.
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Kanchi Documentation
+
+Real-time monitoring for Celery that actually feels good to use. If you've spent years squinting at logs or refreshing Flower tabs, this one's for you.
+
+## What Kanchi does
+
+Kanchi connects directly to your message broker — no agents, no SDK changes — and gives you real-time visibility into task execution. Tasks, workers, retries, failures, everything you need to debug issues and prevent outages.
+
+**Live task monitoring**
+WebSocket-based updates mean you see tasks as they flow through your system. No refresh button, no polling lag. Switch between streaming mode for active debugging and paginated views for historical analysis.
+
+**Orphan detection**
+When tasks fail because a worker crashed or the network dropped, Kanchi flags them automatically. Bulk retry with batch tracking so you can recover gracefully instead of scrambling through logs.
+
+**Workflow automation**
+Event-driven actions that respond to task failures without writing code. Circuit breaker protection prevents infinite retry loops. Slack integration for notifications. Pre-built templates for common scenarios.
+
+**Worker health at a glance**
+Live worker status with heartbeat tracking. See which workers are handling the most load, which ones are idle, and which ones disappeared mid-task.
+
+## Quick start
+
+Get Kanchi running in under 5 minutes:
+
+```bash
+# Download Docker Compose file
+curl -O https://raw.githubusercontent.com/getkanchi/kanchi/main/docker-compose.yaml
+
+# Configure your broker
+export CELERY_BROKER_URL=amqp://user:pass@your-rabbit:5672//
+
+# Start Kanchi
+docker compose up -d --build
+```
+
+Open [http://localhost:3000](http://localhost:3000) and you're done.
+
+<Cards className="mt-6">
+  <Card href="/docs/getting-started/introduction" title="Introduction" description="Learn what Kanchi can do for your Celery infrastructure." />
+  <Card href="/docs/getting-started/quickstart" title="Quickstart" description="Run Kanchi locally in under 5 minutes." />
+  <Card href="/docs/getting-started/installation" title="Installation" description="Deploy to production with Docker or run locally for development." />
+  <Card href="/docs/core/architecture" title="Architecture" description="Understand how Kanchi monitors your task queue." />
+</Cards>
+
+## Key features
+
+### Real-time monitoring
+WebSocket-powered updates. See tasks as they execute. Multi-dimensional filtering: status, date range, task name, worker, queue. Full-text search across task arguments and results.
+
+### Task management
+Detailed retry tracking with parent-child task relationships. Complete state transition history. Deep-linkable URLs for sharing specific task failures with your team.
+
+### Orphan detection
+Automatic identification of tasks that started but never completed. One-click bulk retry with batch tracking. Orphan recovery workflows that run automatically.
+
+### Workflow automation
+Event-driven responses to task failures. Circuit breakers to prevent infinite retry loops. Slack integration for notifications. Pre-built templates for common scenarios.
+
+### Worker health
+Live status with heartbeat tracking. Task distribution metrics. Queue assignments for each worker. Automatic detection of offline workers.
+
+### Analytics
+Daily task statistics aggregated by status. Historical trend analysis. Worker utilization metrics. Task failure rate tracking.
+
+<Callout>
+Kanchi is **broker-agnostic**. Works with both RabbitMQ and Redis message brokers. Pick whichever fits your stack.
+</Callout>
+
+## Core concepts
+
+<Cards className="mt-6">
+  <Card href="/docs/core/architecture" title="Architecture" description="How Kanchi monitors your Celery infrastructure without changes to your code." />
+  <Card href="/docs/core/orphan-detection" title="Orphan Detection" description="Automatic identification and recovery of abandoned tasks." />
+  <Card href="/docs/core/worker-health" title="Worker Health" description="Real-time tracking of worker status and performance." />
+  <Card href="/docs/core/workflow-automation" title="Workflows" description="Event-driven automation for task failures and recovery." />
+</Cards>
+
+## Get help
+
+**Questions?** Open an issue on [GitHub](https://github.com/getkanchi/kanchi/issues)
+
+**Contributing?** Read the [authoring guide](/docs/authoring/overview) to understand how to write documentation.
+
+Built for developers who need intuitive visibility into distributed systems. Try it out and let us know what breaks.

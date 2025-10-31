@@ -34,7 +34,7 @@ The fastest way to run Kanchi is with Docker:
 
     Edit `docker-compose.yaml` and set your broker URL:
 
-    <Tabs items={['RabbitMQ', 'Redis']}>
+    <Tabs items={['RabbitMQ', 'Redis']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
       <Tab value="rabbitmq">
         ```yaml
         environment:
@@ -185,7 +185,7 @@ Tasks will appear in the Kanchi dashboard in real-time as they execute.
 
     Check application logs for "Connected to broker" messages:
 
-    <Tabs items={['Local', 'Docker']}>
+    <Tabs items={['Local', 'Docker']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
       <Tab value="local">
         ```bash
         tail -f kanchi.log

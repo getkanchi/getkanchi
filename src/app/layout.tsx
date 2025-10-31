@@ -61,10 +61,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark overflow-x-hidden">
       <body
-        className={`${GeistSans.variable} ${jetbrainsMono.variable} ${archivo.variable} flex min-h-screen flex-col font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)] overflow-x-hidden`}
+        className={`${GeistSans.variable} ${jetbrainsMono.variable} gap-0 ${archivo.variable} flex min-h-screen flex-col font-sans antialiased bg-[hsl(0,0%,3%)] text-[hsl(0,0%,90%)] overflow-x-hidden`}
       >
         <Header />
-        <main className="pt-12 md:pt-[3.5rem]">{children}</main>
+        <main className="md:pt-[3.5rem]">{children}</main>
       </body>
     </html>
   );

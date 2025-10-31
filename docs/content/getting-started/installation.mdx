@@ -37,7 +37,7 @@ The recommended deployment method. Download one file, configure your broker, run
 
     Or create `docker-compose.yaml` yourself:
 
-    <Tabs items={['With PostgreSQL', 'Bring Your Own']}>
+    <Tabs items={['With PostgreSQL', 'Bring Your Own']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
       <Tab value="postgres">
         ```yaml
         version: '3.8'
@@ -328,7 +328,7 @@ After deploying Kanchi:
   <Step>
     **View logs**
 
-    <Tabs items={['Docker Compose', 'Docker', 'Local']}>
+    <Tabs items={['Docker Compose', 'Docker', 'Local']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
       <Tab value="compose">
         ```bash
         docker compose logs -f kanchi
@@ -380,7 +380,7 @@ After deploying Kanchi:
 
     **Test connectivity**:
 
-    <Tabs items={['RabbitMQ', 'Redis']}>
+    <Tabs items={['RabbitMQ', 'Redis']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
       <Tab value="rabbitmq">
         ```bash
         telnet your-rabbit-host 5672

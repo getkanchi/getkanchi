@@ -8,10 +8,9 @@ type LayoutCSSVariables = CSSProperties & {
   "--fd-banner-height"?: string;
 };
 
-const HEADER_HEIGHT = "3.5rem";
+const HEADER_HEIGHT = "3.0rem";
 const layoutCssVariables: LayoutCSSVariables = {
   "--fd-nav-height": HEADER_HEIGHT,
-  "--fd-banner-height": "0px",
 };
 
 interface DocsLayoutShellProps {

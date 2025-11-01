@@ -1,0 +1,40 @@
+---
+title: Celery Integration
+description: Configure Celery settings for optimal integration with Kanchi.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+Kanchi monitors your Celery tasks by connecting to your broker and result backend. Most Celery configurations work out of the box, but some settings can improve your monitoring experience.
+
+## Task argument size limits
+
+Celery truncates task arguments and keyword arguments at 1024 characters by default when storing task representations. If you're working with large payloads — like passing JSON blobs or file contents as task arguments — you'll see `...` in Kanchi's task detail view instead of the full data.
+
+This is a Celery limitation, not a Kanchi one. The good news: it's configurable.
+
+### Increasing the limits
+
+Override Celery's defaults on your app instance:
+
+```python
+from celery import Celery
+
+app = Celery('your_app')
+
+# Increase representation limits (default: 1024)
+app.amqp.argsrepr_maxsize = 10000
+app.amqp.kwargsrepr_maxsize = 10000
+```
+
+<Callout type="warn">
+**Performance consideration**: Larger limits mean more data stored in your broker and database. If you're passing multi-megabyte arguments, consider storing them elsewhere (S3, Redis, etc.) and passing references instead.
+</Callout>
+
+**When to adjust these values**:
+- Task detail pages show truncated arguments (`...`)
+- You need full argument inspection for debugging
+- Your tasks legitimately require large payloads
+
+**Reference**: See Celery's [`argsrepr_maxsize` documentation](https://docs.celeryq.dev/en/latest/reference/celery.app.amqp.html#celery.app.amqp.AMQP.argsrepr_maxsize) for more details.

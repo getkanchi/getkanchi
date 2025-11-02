@@ -34,7 +34,7 @@ export function CTASection() {
               <span className="text-primary">under 5 minutes</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              docker run, configure, monitor. Self-hosted. Open source. FSL
+              docker run, configure, monitor. Self-hosted. Open source. AGPL 3.0
               licensed.
             </p>
           </motion.div>
@@ -82,7 +82,7 @@ export function CTASection() {
             <div className="hidden sm:block w-1 h-1 rounded-full bg-muted/50" />
             <div className="flex items-center gap-2">
               <Github className="w-4 h-4" />
-              <span>FSL Licensed</span>
+              <span>AGPL 3.0 Licensed</span>
             </div>
             <div className="hidden sm:block w-1 h-1 rounded-full bg-muted/50" />
             <div className="flex items-center gap-2">

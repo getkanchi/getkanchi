@@ -154,9 +154,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📝 License
 
-Functional Source License (FSL) 1.1 - see [LICENSE](LICENSE) for details.
+GNU Affero General Public License v3.0 (AGPL-3.0) - see [LICENSE](LICENSE) for details.
 
-This software is licensed under the FSL 1.1 for non-commercial use. After 2 years from the date of first public availability, it will automatically convert to the Apache License 2.0.
+This software is free and open source, licensed under AGPL-3.0. You are free to use, modify, and distribute it, with the requirement that any modifications to the software must also be made available under the same license, including when used over a network.
 
 ---
 

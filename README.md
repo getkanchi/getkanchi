@@ -154,9 +154,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📝 License
 
-GNU Affero General Public License v3.0 (AGPL-3.0) - see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
-This software is free and open source, licensed under AGPL-3.0. You are free to use, modify, and distribute it, with the requirement that any modifications to the software must also be made available under the same license, including when used over a network.
+This software is free and open source, licensed under MIT. You are free to use, modify, and distribute it.
 
 ---
 

@@ -1,0 +1,32 @@
+---
+title: "Refinements and fixes"
+description: "Docker improvements, health monitoring updates, and better handling of edge cases"
+date: "2025-11-08"
+version: "1.3.1"
+tags: ["Bug Fix", "Enhancement"]
+---
+
+Small but important improvements to deployment, monitoring, and reliability.
+
+## What's new
+
+**ARM64 Docker support**
+Docker images now build for both `linux/amd64` and `linux/arm64` platforms. If you're running on ARM64 systems (Apple Silicon, AWS Graviton, etc.), you can pull and run Kanchi images without manifest errors.
+
+**Health endpoint improvements**
+The health statistics endpoint now respects authentication state. When you're logged in and auth is enabled, the dashboard shows detailed health metrics instead of the minimal public view. The frontend properly detects auth state and calls the appropriate endpoint.
+
+**Python 3.13 compatibility**
+Updated `asyncpg` to the latest version for Python 3.13 support. Both SQLite and PostgreSQL work correctly on newer Python versions now.
+
+## What's fixed
+
+**Docker deployment flow**
+Fixed the deployment workflow for users who download only `docker-compose.yaml`. The compose file now uses pre-built images from Docker Hub (`getkanchi/kanchi:latest`) instead of trying to build locally. No more missing Dockerfile errors when you just want to spin up Kanchi quickly.
+
+**Task truncation handling**
+Tasks with extremely large payloads no longer cause failures. The system now gracefully handles truncation when task arguments or results exceed reasonable size limits.
+
+---
+
+Standard upgrade process: pull the latest Docker image or git changes and restart. Database migrations run automatically if needed.

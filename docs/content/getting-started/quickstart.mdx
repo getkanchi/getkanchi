@@ -17,47 +17,80 @@ Get Kanchi running alongside your Celery workers in minutes. This guide assumes 
 
 ## Quick start with Docker
 
-The fastest way to run Kanchi is with Docker:
+The fastest way to run Kanchi is with Docker. No repository cloning required—just create a compose file and start the container.
 
 <Steps>
   <Step>
-    **Download the Docker Compose file**
+    **Create a docker-compose.yaml file**
 
-    ```bash
-    mkdir kanchi && cd kanchi
-    curl -O https://raw.githubusercontent.com/getkanchi/kanchi/main/docker-compose.yaml
+    Create a new directory and save the following as `docker-compose.yaml`:
+
+    ```yaml
+    services:
+      kanchi:
+        image: getkanchi/kanchi:latest
+        container_name: kanchi
+        ports:
+          - "3000:3000"
+          - "8765:8765"
+        environment:
+          # Required: Your Celery broker connection string
+          CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+
+          # Optional: Database (defaults to SQLite)
+          DATABASE_URL: ${DATABASE_URL:-sqlite:////data/kanchi.db}
+
+          # Optional: Frontend URLs
+          NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL:-http://localhost:8765}
+          NUXT_PUBLIC_WS_URL: ${NUXT_PUBLIC_WS_URL:-ws://localhost:8765/ws}
+        volumes:
+          - kanchi-data:/data
+        restart: unless-stopped
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8765/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 40s
+
+    volumes:
+      kanchi-data:
     ```
   </Step>
 
   <Step>
-    **Configure your broker connection**
+    **Set your broker connection**
 
-    Edit `docker-compose.yaml` and set your broker URL:
+    Export `CELERY_BROKER_URL` or place it in a `.env` file:
 
     <Tabs items={['RabbitMQ', 'Redis']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
       <Tab value="rabbitmq">
-        ```yaml
-        environment:
-          CELERY_BROKER_URL: amqp://user:password@rabbitmq-host:5672//
+        ```bash
+        export CELERY_BROKER_URL=amqp://user:pass@rabbitmq-host:5672//
         ```
       </Tab>
       <Tab value="redis">
-        ```yaml
-        environment:
-          CELERY_BROKER_URL: redis://redis-host:6379/0
+        ```bash
+        export CELERY_BROKER_URL=redis://localhost:6379/0
         ```
       </Tab>
     </Tabs>
+
+    Or create a `.env` file alongside `docker-compose.yaml`:
+
+    ```bash
+    CELERY_BROKER_URL=amqp://user:pass@rabbitmq-host:5672//
+    ```
   </Step>
 
   <Step>
     **Start Kanchi**
 
     ```bash
-    docker compose up -d --build
+    docker compose up -d --pull always
     ```
 
-    Access the dashboard at [http://localhost:3000](http://localhost:3000)
+    This pulls the latest image from Docker Hub and starts the container. Access the dashboard at [http://localhost:3000](http://localhost:3000)
   </Step>
 
   <Step>
@@ -74,7 +107,7 @@ The fastest way to run Kanchi is with Docker:
 </Steps>
 
 <Callout>
-The same `docker compose up` command handles both initial deployment and updates. Pull new code, re-run the command, you're done.
+The same command handles both initial deployment and updates. Just re-run `docker compose up -d --pull always` to update.
 </Callout>
 
 ## Local development setup

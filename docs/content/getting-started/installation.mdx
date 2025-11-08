@@ -25,47 +25,67 @@ Kanchi doesn't manage your message broker or database infrastructure. You bring 
 
 ## Docker Compose
 
-The recommended deployment method. Download one file, configure your broker, run one command.
+The recommended deployment method. Create a compose file, set your broker URL, run one command.
 
 <Steps>
   <Step>
-    **Download the Docker Compose file**
+    **Create docker-compose.yaml**
 
-    ```bash
-    curl -O https://raw.githubusercontent.com/getkanchi/kanchi/main/docker-compose.yaml
-    ```
+    Save the following as `docker-compose.yaml`:
 
-    Or create `docker-compose.yaml` yourself:
-
-    <Tabs items={['With PostgreSQL', 'Bring Your Own']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
-      <Tab value="postgres">
+    <Tabs items={['SQLite (Quick Start)', 'PostgreSQL (Production)', 'Bring Your Own DB']} className="border-gray-800 [&_[role=tab]:hover]:text-white">
+      <Tab value="sqlite">
         ```yaml
-        version: '3.8'
-
         services:
           kanchi:
-            image: ghcr.io/getkanchi/kanchi:latest
+            image: getkanchi/kanchi:latest
+            container_name: kanchi
             ports:
-              - "3000:3000"  # Frontend
-              - "8765:8765"  # Backend API
+              - "3000:3000"
+              - "8765:8765"
             environment:
-              # Required: your broker
-              - CELERY_BROKER_URL=amqp://user:pass@your-rabbit:5672//
-              # Or: CELERY_BROKER_URL=redis://your-redis:6379/0
+              # Required: Your broker URL
+              CELERY_BROKER_URL: ${CELERY_BROKER_URL}
 
-              # Database (PostgreSQL recommended for production)
-              - DATABASE_URL=postgresql+asyncpg://kanchi:kanchi@postgres:5432/kanchi
+              # Optional: Database (defaults to SQLite)
+              DATABASE_URL: ${DATABASE_URL:-sqlite:////data/kanchi.db}
 
-              # Secrets (generate with: openssl rand -hex 32)
-              - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
-              - TOKEN_SECRET_KEY=${TOKEN_SECRET_KEY}
+              # Optional: Frontend URLs
+              NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL:-http://localhost:8765}
+              NUXT_PUBLIC_WS_URL: ${NUXT_PUBLIC_WS_URL:-ws://localhost:8765/ws}
+            volumes:
+              - kanchi-data:/data
+            restart: unless-stopped
+            healthcheck:
+              test: ["CMD", "curl", "-f", "http://localhost:8765/health"]
+              interval: 30s
+              timeout: 10s
+              retries: 3
+              start_period: 40s
 
-              # Frontend URLs
-              - NUXT_PUBLIC_API_URL=http://localhost:8765
-              - NUXT_PUBLIC_WS_URL=ws://localhost:8765/ws
+        volumes:
+          kanchi-data:
+        ```
+      </Tab>
+      <Tab value="postgres">
+        ```yaml
+        services:
+          kanchi:
+            image: getkanchi/kanchi:latest
+            container_name: kanchi
+            ports:
+              - "3000:3000"
+              - "8765:8765"
+            environment:
+              CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+              DATABASE_URL: postgresql+asyncpg://kanchi:kanchi@postgres:5432/kanchi
 
-              # Optional: Authentication (disabled by default)
-              - AUTH_ENABLED=false
+              # Optional: Secrets (recommended for production)
+              SESSION_SECRET_KEY: ${SESSION_SECRET_KEY}
+              TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
+
+              # Optional: Authentication
+              AUTH_ENABLED: ${AUTH_ENABLED:-false}
             depends_on:
               postgres:
                 condition: service_healthy
@@ -74,9 +94,9 @@ The recommended deployment method. Download one file, configure your broker, run
           postgres:
             image: postgres:15-alpine
             environment:
-              - POSTGRES_USER=kanchi
-              - POSTGRES_PASSWORD=kanchi
-              - POSTGRES_DB=kanchi
+              POSTGRES_USER: kanchi
+              POSTGRES_PASSWORD: kanchi
+              POSTGRES_DB: kanchi
             volumes:
               - postgres_data:/var/lib/postgresql/data
             healthcheck:
@@ -92,29 +112,29 @@ The recommended deployment method. Download one file, configure your broker, run
       </Tab>
       <Tab value="byo">
         ```yaml
-        version: '3.8'
-
         services:
           kanchi:
-            image: ghcr.io/getkanchi/kanchi:latest
+            image: getkanchi/kanchi:latest
+            container_name: kanchi
             ports:
               - "3000:3000"
               - "8765:8765"
             environment:
-              # Point to your existing broker and database
-              - CELERY_BROKER_URL=amqp://user:pass@your-rabbit-host:5672//
-              - DATABASE_URL=postgresql+asyncpg://user:pass@your-postgres-host:5432/kanchi
-
-              # Secrets
-              - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
-              - TOKEN_SECRET_KEY=${TOKEN_SECRET_KEY}
+              # Point to your existing infrastructure
+              CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+              DATABASE_URL: ${DATABASE_URL}
 
               # Frontend URLs (adjust to your domain)
-              - NUXT_PUBLIC_API_URL=https://your-domain.com
-              - NUXT_PUBLIC_WS_URL=wss://your-domain.com/ws
+              NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL:-https://your-domain.com}
+              NUXT_PUBLIC_WS_URL: ${NUXT_PUBLIC_WS_URL:-wss://your-domain.com/ws}
 
-              # CORS (if frontend is on different domain)
-              - ALLOWED_ORIGINS=https://your-domain.com
+              # CORS
+              ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+              ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+
+              # Secrets
+              SESSION_SECRET_KEY: ${SESSION_SECRET_KEY}
+              TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
             restart: unless-stopped
         ```
       </Tab>
@@ -122,20 +142,27 @@ The recommended deployment method. Download one file, configure your broker, run
   </Step>
 
   <Step>
-    **Configure secrets**
+    **Set required environment variables**
 
-    Generate random secrets for session management:
+    At minimum, export `CELERY_BROKER_URL` or add it to a `.env` file:
 
     ```bash
-    export SESSION_SECRET_KEY=$(openssl rand -hex 32)
-    export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
+    # For RabbitMQ:
+    export CELERY_BROKER_URL=amqp://user:pass@rabbitmq-host:5672//
+
+    # For Redis:
+    export CELERY_BROKER_URL=redis://localhost:6379/0
     ```
 
-    Or add them to a `.env` file:
+    Optional overrides:
 
     ```bash
-    echo "SESSION_SECRET_KEY=$(openssl rand -hex 32)" >> .env
-    echo "TOKEN_SECRET_KEY=$(openssl rand -hex 32)" >> .env
+    # Database (if not using SQLite)
+    export DATABASE_URL=postgresql://user:pass@postgres-host:5432/kanchi
+
+    # Secrets (recommended for production)
+    export SESSION_SECRET_KEY=$(openssl rand -hex 32)
+    export TOKEN_SECRET_KEY=$(openssl rand -hex 32)
     ```
   </Step>
 
@@ -143,15 +170,10 @@ The recommended deployment method. Download one file, configure your broker, run
     **Start Kanchi**
 
     ```bash
-    docker compose up -d --build
+    docker compose up -d --pull always
     ```
 
-    The same command handles both initial deployment and updates:
-
-    ```bash
-    # Pull latest, rebuild, and restart
-    docker compose up -d --build --pull always --force-recreate
-    ```
+    The same command handles both initial deployment and updates. Re-run to pull the latest image and restart.
   </Step>
 
   <Step>
@@ -294,7 +316,7 @@ docker run -d \
   -e SESSION_SECRET_KEY=$(openssl rand -hex 32) \
   -e NUXT_PUBLIC_API_URL=http://localhost:8765 \
   -e NUXT_PUBLIC_WS_URL=ws://localhost:8765/ws \
-  ghcr.io/getkanchi/kanchi:latest
+  getkanchi/kanchi:latest
 ```
 
 For SQLite (development only):
@@ -304,10 +326,10 @@ docker run -d \
   --name kanchi \
   -p 3000:3000 \
   -p 8765:8765 \
-  -v $(pwd)/kanchi.db:/app/kanchi.db \
+  -v kanchi-data:/data \
   -e CELERY_BROKER_URL=redis://redis-host:6379/0 \
-  -e DATABASE_URL=sqlite:///kanchi.db \
-  ghcr.io/getkanchi/kanchi:latest
+  -e DATABASE_URL=sqlite:////data/kanchi.db \
+  getkanchi/kanchi:latest
 ```
 
 ## Verify installation

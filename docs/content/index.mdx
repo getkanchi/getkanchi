@@ -28,17 +28,33 @@ Live worker status with heartbeat tracking. See which workers are handling the m
 
 ## Quick start
 
-Get Kanchi running in under 5 minutes:
+Get Kanchi running in under 5 minutes with Docker Compose and pre-built images from Docker Hub:
 
 ```bash
-# Download Docker Compose file
-curl -O https://raw.githubusercontent.com/getkanchi/kanchi/main/docker-compose.yaml
+# Create a minimal docker-compose.yaml
+cat > docker-compose.yaml <<'EOF'
+services:
+  kanchi:
+    image: getkanchi/kanchi:latest
+    container_name: kanchi
+    ports:
+      - "3000:3000"
+      - "8765:8765"
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+    volumes:
+      - kanchi-data:/data
+    restart: unless-stopped
+
+volumes:
+  kanchi-data:
+EOF
 
 # Configure your broker
 export CELERY_BROKER_URL=amqp://user:pass@your-rabbit:5672//
 
 # Start Kanchi
-docker compose up -d --build
+docker compose up -d --pull always
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and you're done.

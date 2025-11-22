@@ -1,0 +1,32 @@
+---
+title: "MySQL support and pickle opt-in"
+description: "Health probes move to /api/health, optional pickle payloads, and clearer version visibility"
+date: "2025-11-15"
+version: "1.3.2"
+tags: ["Bug Fix", "Enhancement"]
+---
+
+Steady refinements focused on compatibility and operational clarity.
+
+## What's new
+
+**MySQL deployments are now supported**
+Kanchi now bundles a compatible MySQL driver so MySQL stacks start cleanly and run with first-class support.
+
+**Optional pickle serialization**
+Celery payloads remain JSON-first, but you can opt in to pickle by setting `ENABLE_PICKLE_SERIALIZATION=true`. When enabled, Kanchi accepts `application/x-python-serialize` and logs a startup warning to flag the risk.
+
+## Improvements
+
+**Health probes use `/api/health`**
+The healthcheck endpoint moved for consistency. Update liveness/readiness probes and scripts from `/health` to `/api/health`.
+
+**Version visibility**
+The running app version is now exposed in the UI and API responses to speed up support and troubleshooting.
+
+**Safer event logging**
+`_json_safe` now understands Enum values so event logs stay stable instead of failing on uncommon payloads.
+
+---
+
+Upgrade as usual: pull the latest image or code, apply your environment variables, and restart the services.

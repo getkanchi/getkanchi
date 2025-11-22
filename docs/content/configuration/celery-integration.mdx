@@ -38,3 +38,29 @@ app.amqp.kwargsrepr_maxsize = 10000
 - Your tasks legitimately require large payloads
 
 **Reference**: See Celery's [`argsrepr_maxsize` documentation](https://docs.celeryq.dev/en/latest/reference/celery.app.amqp.html#celery.app.amqp.AMQP.argsrepr_maxsize) for more details.
+
+## Pickle serialization (opt-in)
+
+Celery pickle payloads stay blocked by default because unpickling can run arbitrary code. Only turn this on in trusted environments where you control every producer.
+
+<Callout type="warn">
+Pickle acceptance is for trusted networks only. If an untrusted publisher can send messages, keep this disabled.
+</Callout>
+
+**What changed**
+- The monitor can now accept `application/x-python-serialize` payloads when explicitly enabled.
+- When enabled, startup logs include a warning so the risk is visible.
+
+**Enable it**
+
+1. Set `ENABLE_PICKLE_SERIALIZATION=true` in your environment (Compose, Kubernetes, or local env vars).
+2. Keep your workers pickle-aware, e.g.:
+
+   ```python
+   accept_content = ['json', 'pickle']
+   task_serializer = 'pickle'
+   ```
+3. Restart Kanchi so the Celery client reloads its configuration.
+4. Verify data flow. Logs will note that pickle deserialization is active.
+
+Prefer JSON whenever possible; flip on pickle only when you need interoperability with trusted producers.

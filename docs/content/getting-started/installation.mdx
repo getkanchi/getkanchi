@@ -9,7 +9,7 @@ import { Cards, Card } from 'fumadocs-ui/components/card';
 import { Accordions, Accordion } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
 
-Kanchi runs wherever Docker runs. For production, point it at PostgreSQL. For development, SQLite works great.
+Kanchi runs wherever Docker runs. For production, point it at PostgreSQL or MySQL. For development, SQLite works great.
 
 <Callout>
 Kanchi doesn't manage your message broker or database infrastructure. You bring RabbitMQ or Redis, and optionally PostgreSQL. We handle the monitoring.
@@ -26,6 +26,10 @@ Kanchi doesn't manage your message broker or database infrastructure. You bring 
 ## Docker Compose
 
 The recommended deployment method. Create a compose file, set your broker URL, run one command.
+
+<Callout>
+Deploying on MySQL? Set `DATABASE_URL` to your MySQL DSN (for example: `mysql+aiomysql://user:pass@mysql:3306/kanchi`). MySQL is now fully supported in 1.3.2.
+</Callout>
 
 <Steps>
   <Step>
@@ -57,7 +61,7 @@ The recommended deployment method. Create a compose file, set your broker URL, r
               - kanchi-data:/data
             restart: unless-stopped
             healthcheck:
-              test: ["CMD", "curl", "-f", "http://localhost:8765/health"]
+              test: ["CMD", "curl", "-f", "http://localhost:8765/api/health"]
               interval: 30s
               timeout: 10s
               retries: 3
@@ -182,6 +186,8 @@ The recommended deployment method. Create a compose file, set your broker URL, r
     Open [http://localhost:3000](http://localhost:3000)
 
     Backend API documentation: [http://localhost:8765/docs](http://localhost:8765/docs)
+
+    The dashboard footer and `/api/health` response include the running version to speed up support requests.
   </Step>
 </Steps>
 

@@ -116,7 +116,7 @@ export function HeroSection() {
                   </AnimatedSpan>
 
                   <TypingAnimation delay={1200} className="text-muted">
-                    $ curl localhost:8000/health
+                    $ curl localhost:8000/api/health
                   </TypingAnimation>
 
                   <AnimatedSpan delay={1600} className="text-primary">

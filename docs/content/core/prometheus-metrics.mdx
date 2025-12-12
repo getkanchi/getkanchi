@@ -1,0 +1,55 @@
+---
+title: Prometheus metrics
+description: Expose task and worker telemetry for scraping and alerting.
+---
+
+Kanchi ships with a Prometheus endpoint so you can scrape task and worker telemetry straight from the backend — no extra plugins required.
+
+## Endpoint
+
+The FastAPI backend exposes metrics at `/metrics` (plain text, Prometheus format).
+
+```bash
+curl http://localhost:8765/metrics
+```
+
+## Scrape configuration
+
+Add Kanchi as a scrape target in your Prometheus config. Example for a single instance:
+
+```yaml
+scrape_configs:
+  - job_name: kanchi
+    metrics_path: /metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["kanchi:8765"]  # replace with your host/port
+```
+
+If you run multiple Kanchi instances behind a load balancer, point Prometheus at each instance directly or use service discovery.
+
+## Metrics emitted
+
+**`kanchi_task_events_total`** (`counter`)  
+Count of task events observed from the Celery broker. Labels: `task_name`, `event_type`, `worker`.
+
+**`kanchi_task_queue_wait_seconds`** (`gauge`)  
+Time a task spent queued at a worker before execution began. Labels: `task_name`, `worker`.
+
+**`kanchi_worker_prefetch_count`** (`gauge`)  
+Number of tasks currently prefetched (reserved) by a worker. Labels: `task_name`, `worker`.
+
+**`kanchi_task_execution_duration_seconds`** (`histogram`)  
+Duration of task execution. Labels: `task_name`, `worker`.
+
+**`kanchi_worker_status`** (`gauge`)  
+Worker availability flag (`1` = online, `0` = offline). Labels: `worker`.
+
+**`kanchi_worker_active_tasks`** (`gauge`)  
+Count of tasks currently being processed by a worker. Labels: `worker`.
+
+## Usage notes
+
+- Metrics are derived from Celery task and worker events; ensure workers emit events (start Celery with `-E` or set `worker_send_task_events=True`).
+- Task and worker names flow into labels. If you have highly dynamic names, consider Prometheus relabeling to keep cardinality manageable.
+- The endpoint is unauthenticated by default. Place it behind your usual network controls or a reverse proxy if you need to restrict access.

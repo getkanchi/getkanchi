@@ -3,6 +3,7 @@
   "pages": [
     "architecture",
     "orphan-detection",
+    "prometheus-metrics",
     "worker-health",
     "workflow-automation"
   ]

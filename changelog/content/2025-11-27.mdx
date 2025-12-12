@@ -1,0 +1,21 @@
+---
+title: "Prometheus metrics and manual task resolution"
+description: "Expose task and worker metrics for Prometheus, and resolve tasks directly in the app with synced UI state"
+date: "2025-11-27"
+version: "1.3.6"
+tags: ["Feature", "Enhancement"]
+---
+
+Observability gets a boost and task cleanup gets easier.
+
+## What's new
+
+**Prometheus metrics**
+A dedicated metrics router now exposes task and worker event metrics via the Prometheus client, ready to plug into your existing monitoring. See the [Prometheus metrics guide](/docs/core/prometheus-metrics) for scrape setup and metric names.
+
+**Manual task resolution**
+New database model, API routes, service methods, and UI controls let you resolve or unresolve tasks by hand. Resolution status now surfaces across dashboards and task detail views.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. Migrations apply automatically.

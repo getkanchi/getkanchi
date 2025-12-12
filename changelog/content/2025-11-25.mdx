@@ -1,0 +1,21 @@
+---
+title: "MySQL stability and first Kubernetes manifests"
+description: "MySQL inserts are now reliable and timestamped in UTC, plus initial Kubernetes manifests and deployment guides"
+date: "2025-11-25"
+version: "1.3.5"
+tags: ["Feature", "Enhancement"]
+---
+
+Focused on database correctness and easier cluster rollouts.
+
+## What's new
+
+**MySQL-friendly task handling**
+Task service inserts now work cleanly on MySQL and normalize timestamps to UTC so event comparisons stay consistent across databases.
+
+**Kubernetes starter kit**
+First-pass manifests for deployments, ingress, PVC, secrets, and services, along with a deployment guide and MySQL config example, to simplify getting Kanchi running in a cluster.
+
+---
+
+Standard upgrade: pull the latest image or code, apply your environment variables, and restart. Database migrations run automatically if needed.

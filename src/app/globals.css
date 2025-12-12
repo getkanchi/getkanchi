@@ -124,7 +124,9 @@
    This lets shadcn components use their colors
    ============================================================================= */
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     border-color: hsl(var(--border));
   }
 

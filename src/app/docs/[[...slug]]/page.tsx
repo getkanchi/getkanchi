@@ -37,7 +37,6 @@ export default function DocsRoute({ params }: PageProps) {
           />
         ),
       }}
-      footer={{ enabled: true }}
     >
       <DocsBody className="prose dark:prose-invert max-w-none prose-headings:scroll-mt-8 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-balance prose-headings:no-underline prose-p:tracking-tight prose-p:text-balance">
         <MDX />

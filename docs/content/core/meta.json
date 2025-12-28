@@ -2,6 +2,7 @@
   "title": "Core Concepts",
   "pages": [
     "architecture",
+    "task-progress",
     "orphan-detection",
     "prometheus-metrics",
     "worker-health",

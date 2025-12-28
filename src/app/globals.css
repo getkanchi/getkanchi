@@ -127,16 +127,17 @@
   *,
   *::before,
   *::after {
-    border-color: hsl(var(--border));
+    border-color: var(--border);
   }
 
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--background);
+    color: var(--foreground);
   }
 
   #nd-sidebar,
   #nd-sidebar-mobile {
+    --sidebar-border: hsl(220 13% 18% / 0.55);
     --color-fd-background: var(--surface);
     --color-fd-card: var(--surface);
     --color-fd-card-foreground: var(--foreground);

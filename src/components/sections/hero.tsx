@@ -1,141 +1,94 @@
-"use client";
-
-import {
-  Terminal as TerminalIcon,
-  Github,
-  ArrowRight,
-  Activity,
-} from "lucide-react";
-import { ShimmerButton } from "@/components/magicui/shimmer-button";
-import {
-  AnimatedSpan,
-  Terminal,
-  TypingAnimation,
-} from "@/components/ui/terminal";
-import { DotPatternWithGlowEffect } from "@/components/common/animated-dot-pattern";
-import NumberTicker from "@/components/magicui/number-ticker";
-import { BlurFade } from "@/components/ui/blur-fade";
+import Link from "next/link";
+import { Github, ShieldCheck, Workflow, Database } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LightboxImage } from "@/components/ui/lightbox-image";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen overflow-hidden">
-      <DotPatternWithGlowEffect />
+    <section className="relative overflow-hidden border-b border-border/60">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_circle_at_15%_20%,rgba(16,185,129,0.14),transparent_55%),radial-gradient(800px_circle_at_85%_10%,rgba(56,189,248,0.12),transparent_50%)]" />
+      <div className="pointer-events-none absolute -top-40 right-0 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 left-0 h-96 w-96 rounded-full bg-info/10 blur-3xl" />
 
-      <div className="flex items-center justify-center min-h-screen border-border">
-        <div className="container relative z-10 mx-auto px-4 py-16">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Column - Content */}
-            <div className="space-y-6">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight">
-                <BlurFade duration={0.6}>Monitor Celery.</BlurFade>
-                <BlurFade delay={0.5} duration={0.6}>
-                  In Real-Time.
-                </BlurFade>
-              </h1>
-              <BlurFade direction={"right"} delay={2 * 0.5}>
-                <p className="text-muted max-w-xl leading-relaxed">
-                  The only monitoring tool with automatic orphan detection.
-                  Track tasks, automate workflows, and never lose a job again.
-                </p>
-              </BlurFade>
-              <BlurFade delay={3 * 0.5} duration={0.6} direction={"right"}>
-                <div className="flex w-full justify-between max-w-xs mb-4 mt-8">
-                  <div className="flex flex-col">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold font-mono">
-                        <NumberTicker value={100} />%
-                      </span>
-                    </div>
-                    <span className="text-sm text-muted-foreground font-mono">
-                      Open Source
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold font-mono">
-                        <NumberTicker value={10} />+
-                      </span>
-                    </div>
-                    <span className="text-sm  font-mono">Unique Features</span>
-                  </div>
-                </div>
-                <div className="flex sm:flex-row gap-3 mt-8 items-center">
-                  <ShimmerButton
-                    className="shadow-2xl"
-                    onClick={() =>
-                      window.open(
-                        "https://github.com/getkanchi/kanchi",
-                        "_blank",
-                        "noopener,noreferrer",
-                      )
-                    }
-                  >
-                    <Github className="w-4 h-4 mr-2" />
-                    Show on GitHub
-                  </ShimmerButton>
-                </div>
-                <p className="text-xs font-mono text-muted-foreground mb-2 mt-32">
-                  ONE COMMAND TO START
-                </p>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-transparent to-info rounded-lg opacity-20 group-hover:opacity-30 blur transition-opacity" />
-                  <div className="relative bg-background border border-border rounded-lg p-3 font-mono text-sm flex items-center justify-between">
-                    <code className="text-muted-foreground flex-1">
-                      $ docker run getkanchi/kanchi
-                    </code>
-                    <button
-                      className="text-muted-foreground hover:text-primary transition-colors text-xs"
-                      onClick={() =>
-                        navigator.clipboard.writeText(
-                          "docker run -d -p 8000:8000 getkanchi/kanchi",
-                        )
-                      }
-                    >
-                      Copy
-                    </button>
-                  </div>
-                </div>
-              </BlurFade>
+      <div className="container relative z-10 mx-auto px-4 py-20 md:py-28">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-mono text-muted-foreground shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+              <span className="h-2 w-2 rounded-full bg-success" />
+              Kanchi 1.0 is live
             </div>
+            <h1 className="text-4xl font-display font-semibold tracking-tight text-foreground md:text-6xl">
+              Real-time Celery monitoring without the chaos.
+            </h1>
+            <p className="max-w-xl text-base text-muted-foreground md:text-lg">
+              Kanchi connects directly to your message broker. Track tasks, retries, failures, and worker health in
+              real time.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                asChild
+                className="bg-foreground text-background hover:bg-foreground/90"
+              >
+                <Link href="/docs/getting-started/quickstart">
+                  Read the docs
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="border-border/60 bg-background/30 text-foreground/80 hover:text-foreground hover:bg-background/60"
+              >
+                <a
+                  href="https://github.com/getkanchi/kanchi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Github className="h-4 w-4" />
+                  View on GitHub
+                </a>
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs font-mono text-muted-foreground">
+              {[
+                { label: "Workflow automation ready", Icon: Workflow },
+                { label: "RabbitMQ and Redis", Icon: Database },
+                { label: "MIT licensed", Icon: ShieldCheck },
+              ].map(({ label, Icon }) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1"
+                >
+                  <Icon className="h-3 w-3 text-primary" />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
 
-            <BlurFade delay={5 * 0.5} direction={"right"} duration={0.6}>
-              <div className="hidden md:block">
-                <Terminal className="bg-surface border-border">
-                  <TypingAnimation delay={0} className="text-muted">
-                    $ docker run -d -p 8000:8000 getkanchi/kanchi
-                  </TypingAnimation>
-
-                  <AnimatedSpan delay={600} className="text-[hsl(158,64%,52%)]">
-                    ✓ Container started successfully
-                  </AnimatedSpan>
-                  <AnimatedSpan delay={700} className="text-[hsl(199,89%,58%)]">
-                    → Connecting to redis://localhost:6379
-                  </AnimatedSpan>
-                  <AnimatedSpan delay={900} className="text-[hsl(158,64%,52%)]">
-                    ✓ Connected to broker
-                  </AnimatedSpan>
-
-                  <TypingAnimation delay={1200} className="text-muted">
-                    $ curl localhost:8000/api/health
-                  </TypingAnimation>
-
-                  <AnimatedSpan delay={1600} className="text-primary">
-                    {`{"status": "healthy", "workers": 3, "tasks": 127}`}
-                  </AnimatedSpan>
-
-                  <TypingAnimation delay={2000} className="text-muted">
-                    $ open http://localhost:8000
-                  </TypingAnimation>
-
-                  <AnimatedSpan
-                    delay={2400}
-                    className="text-[hsl(158,64%,52%)]"
-                  >
-                    ✓ Dashboard ready - Monitoring 3 workers
-                  </AnimatedSpan>
-                </Terminal>
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/20 via-transparent to-info/10 blur-2xl" />
+            <div className="relative rounded-2xl border border-border/50 bg-background/40 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+              <div className="flex items-center justify-between px-2 pb-3 text-xs font-mono text-muted-foreground">
+                <span>Live dashboard</span>
+                <span className="inline-flex items-center gap-2 text-success">
+                  <span className="h-2 w-2 rounded-full bg-success" />
+                  Connected
+                </span>
               </div>
-            </BlurFade>
+              <LightboxImage
+                src="/images/screenshots/dashboard-overview.png"
+                alt="Kanchi dashboard overview"
+                width={2870}
+                height={1608}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                title="Dashboard overview"
+                description="All workers, tasks, and alerts in one live view."
+                priority
+                imageClassName="rounded-xl border border-border/40 shadow-[0_18px_40px_rgba(0,0,0,0.35)]"
+              />
+            </div>
           </div>
         </div>
       </div>

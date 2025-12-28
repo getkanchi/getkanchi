@@ -85,7 +85,7 @@ export function Footer() {
               <li>
                 <a
                   href="/changelog"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Changelog
                 </a>
@@ -102,7 +102,7 @@ export function Footer() {
                   href="https://github.com/getkanchi/kanchi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   GitHub
                 </a>
@@ -112,7 +112,7 @@ export function Footer() {
                   href="https://discord.gg/gSp9wsu3k"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Discord
                 </a>
@@ -129,7 +129,7 @@ export function Footer() {
                   href="https://github.com/getkanchi/kanchi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   GitHub
                 </a>

@@ -1,0 +1,27 @@
+---
+title: "Task progress tracking and the Kanchi SDK"
+description: "Track task progress and steps, plus a lightweight SDK to emit events"
+date: "2025-12-28"
+version: "1.3.8"
+tags: ["Feature", "Enhancement"]
+---
+
+Progress tracking lands in Kanchi, plus a tiny SDK for emitting events.
+
+## What's new
+
+**Task progress and steps**
+Kanchi now ingests `kanchi-task-progress` and `kanchi-task-steps` events, stores
+progress history, and renders a progress bar with step details in the task view.
+A new `/api/tasks/{task_id}/progress` endpoint exposes the latest snapshot and
+history. See the [Task progress guide](/docs/core/task-progress).
+
+**Kanchi SDK (alpha)**
+A new `kanchi-sdk` package provides typed helpers and a task mixin for emitting
+progress and step events. It is optional; you can emit the same events directly
+with Celery if you prefer.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. Migrations apply
+automatically.

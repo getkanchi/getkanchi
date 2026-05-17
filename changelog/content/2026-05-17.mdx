@@ -1,0 +1,46 @@
+---
+title: "Data retention controls and cleanup scheduling"
+description: "Control how long Kanchi keeps operational data, preview cleanup runs, and schedule automatic cleanup"
+date: "2026-05-17"
+version: "1.4.0"
+tags: ["Feature", "Enhancement"]
+---
+
+This release gives you direct control over how long Kanchi keeps operational
+data, with safe manual cleanup and optional automatic scheduling.
+
+## What's new
+
+**Data retention settings**
+Kanchi now includes configurable retention windows for task history, worker
+events, workflow executions, daily stats, and inactive sessions. Defaults are
+set to keep recent operational context while avoiding unbounded data growth.
+
+**Cleanup preview and manual runs**
+The settings page now has a Data retention section where you can edit retention
+windows, preview what cleanup would remove, and run cleanup when ready. Cleanup
+results show affected rows by target, and Kanchi prevents overlapping cleanup
+runs.
+
+**Automatic cleanup scheduling**
+Automatic cleanup can now run on an hourly, daily, weekly, or monthly schedule.
+It is disabled by default, so you can review your retention settings before
+turning it on. The app also shows the latest automatic cleanup status, including
+whether it succeeded, failed, or is still running.
+
+**Reliability and polish**
+The Celery event monitor now reconnects more reliably after broker disconnects,
+sensitive broker and database URLs are masked in logs, task routing details are
+preserved more consistently, and a few heavier queries were optimized. The UI
+also gets refreshed retention controls, clearer 24-hour timestamps, cleaner
+progress display, and small visual refinements.
+
+**Project chores**
+Docker images now publish to both Docker Hub and GitHub Container Registry, demo
+data setup is easier, test worker scripts were updated, and README screenshots
+were refreshed.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. Migrations apply
+automatically. Automatic retention cleanup remains off until you enable it.

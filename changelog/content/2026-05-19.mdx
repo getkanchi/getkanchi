@@ -1,0 +1,20 @@
+---
+title: "Docker image database driver fix"
+description: "Restores the missing database drivers in the Docker image"
+date: "2026-05-19"
+version: "1.4.1"
+tags: ["Bug Fix"]
+---
+
+A small patch release to keep Docker deployments running cleanly.
+
+## What's fixed
+
+**Database drivers restored**
+The Docker image now includes the required database drivers again. This fixes a
+regression where containerized deployments could start without the drivers needed
+to connect to the configured database.
+
+---
+
+Upgrade as usual: pull the latest image and restart your services.

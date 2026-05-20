@@ -1,0 +1,48 @@
+---
+title: "Bulk task actions and rerun input review"
+description: "Resolve, unresolve, and rerun many Tasks at once, with reviewed and editable rerun inputs"
+date: "2026-05-20"
+version: "1.5.0"
+tags: ["Feature", "Enhancement"]
+---
+
+This release makes Task operations safer at scale: select the work you want to
+act on, review reruns before they create new Tasks, and keep a clear record of
+what happened.
+
+## What's new
+
+**Bulk Task actions**
+Task tables now support explicit multi-row selection for resolving, unresolving,
+and rerunning Tasks. Resolve and unresolve run immediately, apply only to the
+selected Tasks, and report which items changed, which were already in the
+requested state, and which failed.
+
+**Rerun review**
+Manual reruns now open a review flow before Kanchi submits new work. The review
+shows which Tasks are ready, which need repaired inputs, which are blocked, and
+which have been skipped from a mixed selection. If nothing is ready, the rerun
+cannot be confirmed.
+
+**Editable rerun inputs**
+The review drawer shows the exact `args` and `kwargs` Kanchi will send, with
+structured editing for normal changes and raw JSON for larger payloads.
+Truncated or missing captured values can be replaced before rerun, while invalid
+or incomplete inputs stay blocked until fixed.
+
+**Action activity and lineage**
+Task actions now have a persistent activity drawer with per-Task outcomes,
+failed and skipped items, original-to-rerun links, and live lifecycle counts for
+created rerun Tasks. Rerun activity also keeps submitted inputs, diffs, and
+copyable `send_task` snippets available for later investigation.
+
+**Safety and visibility**
+Rerun creates new Tasks without rewriting the original Task or changing its
+resolution state. Action history persists after navigation or reload, follows
+normal Task visibility, and records who started the action when Kanchi can
+identify the user.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. Migrations apply
+automatically.

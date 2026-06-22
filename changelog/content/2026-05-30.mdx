@@ -1,0 +1,45 @@
+---
+title: "Rerun-aware failure tracking"
+description: "Manual reruns now clear addressed failures, and workflow conditions can be removed cleanly."
+date: "2026-05-30"
+version: "1.5.1"
+tags: ["Bug Fix"]
+---
+
+Kanchi 1.5.1 tightens two follow-up paths from the bulk task action release:
+manual reruns now count as addressed failures, and workflow filters can be
+cleared without leaving stale conditions behind.
+
+## What's fixed
+
+**Manual reruns clear failure lists**
+Failed Tasks now drop original failures once a manual rerun creates replacement
+work. The backend also excludes manually rerun originals from recent failure
+queries and task failure counts, matching the existing behavior for Celery
+retries.
+
+**Accurate task failure stats**
+Task registry stats now count only unaddressed failures. A failure that has been
+retried or manually rerun no longer keeps the task's failed count elevated,
+while a failed rerun child still counts as its own failure until it is
+addressed.
+
+**Workflow condition removal**
+Editing a workflow now correctly saves removed conditions. When the last
+condition is deleted, the UI sends an explicit null value and the backend clears
+the stored condition group instead of keeping the previous filters.
+
+## What's improved
+
+**Live failure updates**
+Live task action events now update the Failed Tasks store, so reruns remove
+addressed failures without waiting for a manual refresh.
+
+**Regression coverage**
+New unit tests cover rerun-aware failure stats, recent failed task filtering,
+and clearing workflow conditions during updates.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. No database
+migrations are required.

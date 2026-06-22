@@ -1,0 +1,74 @@
+---
+title: "Backend-hosted UI"
+description: "Serve the Kanchi UI from the backend, with same-origin API and WebSocket URLs for simpler Docker and Kubernetes deployments."
+date: "2026-06-22"
+version: "2.0.0"
+tags: ["Feature", "Enhancement", "Breaking Change"]
+---
+
+Kanchi 2.0.0 simplifies deployment by serving the generated UI from the FastAPI
+backend. The app, API, and WebSocket endpoint now run from one process and one
+backend port, with runtime URL handling for reverse proxies and path-prefixed
+installs.
+
+## What's new
+
+**Backend-hosted UI**
+The Docker image now serves the generated Nuxt UI from FastAPI at `/ui`. Kanchi
+no longer needs a separate Node preview server in the runtime container, so the
+backend, API, WebSocket, and UI are all served from port `8765`.
+
+**Runtime backend URLs**
+The frontend now receives its API, WebSocket, frontend base URL, and public URL
+prefix from the backend at request time. The default setup uses same-origin
+paths, so deployments can change public URLs or proxy prefixes without
+rebuilding the frontend assets.
+
+**Reverse proxy path support**
+New root path handling lets Kanchi run behind a public prefix such as `/kanchi`.
+`KANCHI_ROOT_PATH` configures the FastAPI root path and frontend asset URLs,
+while `NUXT_PUBLIC_URL_PREFIX` remains supported for existing deployments.
+
+**Deployment updates**
+Docker Compose, Kubernetes manifests, the Docker run helper, and the README now
+reflect the single-port layout. The Kubernetes service and ingress route to port
+`8765`, and local Docker examples open the UI at `/ui`.
+
+## What's improved
+
+**Frontend URL cleanup**
+The command palette, API client, logger, login flow, and WebSocket store now use
+the same backend URL helper instead of hard-coded localhost or build-time Nuxt
+runtime values. OAuth redirects and authenticated WebSocket connections also
+respect the configured frontend base path.
+
+**Smaller runtime container**
+The final Docker image no longer installs Node.js or runs the Nuxt preview
+server. It copies pre-generated static UI assets into the backend image and
+starts Kanchi with `python app.py`.
+
+**Static UI coverage**
+New unit tests cover serving the generated UI, SPA fallback behavior, runtime
+config injection, asset prefixing, root redirects, prefixed API and WebSocket
+paths, and normalized root path startup.
+
+## Compatibility notes
+
+**Port and path changes**
+Existing deployments that exposed a separate frontend port should update their
+port mappings, ingress rules, reverse proxies, and bookmarks. The UI is now
+served from `/ui` on the backend service, for example
+`http://localhost:8765/ui`.
+
+**Python and FastAPI baseline**
+The backend now targets Python 3.10 or newer and updates FastAPI to `0.138.0`,
+bringing in the frontend-serving support used by the backend-hosted UI.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. No database
+migrations are required, but update any Docker, Kubernetes, reverse-proxy,
+health-check, or bookmark configuration that still points the UI at a separate
+frontend port. The UI is now served from `/ui` on the backend service, for
+example `http://localhost:8765/ui`, and source installs now require Python 3.10
+or newer.

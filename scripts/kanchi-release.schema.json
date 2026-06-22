@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "description",
+    "tags",
+    "lead",
+    "sections",
+    "upgrade_note",
+    "github_release_body",
+    "change_analysis"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short changelog title in the existing getkanchi tone."
+    },
+    "description": {
+      "type": "string",
+      "description": "One-sentence changelog summary for frontmatter."
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "Feature",
+          "Enhancement",
+          "Breaking Change",
+          "Bug Fix",
+          "Maintenance",
+          "Security",
+          "Documentation"
+        ]
+      }
+    },
+    "lead": {
+      "type": "string",
+      "description": "Opening paragraph for the public changelog entry."
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["heading", "items"],
+        "properties": {
+          "heading": {
+            "type": "string",
+            "description": "A changelog section heading, for example What's new or What's fixed."
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["title", "body"],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "upgrade_note": {
+      "type": "string",
+      "description": "Closing upgrade note, matching the existing changelog tone."
+    },
+    "github_release_body": {
+      "type": "string",
+      "description": "Markdown body suitable for the Kanchi GitHub release."
+    },
+    "change_analysis": {
+      "type": "string",
+      "description": "Detailed private analysis of what changed and why it matters."
+    }
+  }
+}

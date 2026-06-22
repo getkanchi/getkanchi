@@ -17,12 +17,13 @@ const archivo = Archivo({
 });
 
 export const metadata: Metadata = {
-  title: "Kanchi - Self-hosted Celery monitoring. Built for developers.",
+  title: "Kanchi - Self-hosted Celery operations",
   description:
-    "Real-time Celery task monitoring with automatic orphan detection, worker health tracking, and workflow automation. Open source and production-ready.",
+    "Self-hosted Celery monitoring, failure triage, safe task reruns, workflow automation, task progress, and operational audit history.",
   keywords: [
     "celery",
     "monitoring",
+    "task recovery",
     "task queue",
     "python",
     "devops",
@@ -37,20 +38,20 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://getkanchi.com",
-    title: "Kanchi - Self-hosted Celery monitoring",
+    url: "https://kanchi.io",
+    title: "Kanchi - Self-hosted Celery operations",
     description:
-      "Real-time Celery task monitoring with automatic orphan detection and workflow automation.",
+      "Monitor Celery, triage failures, rerun tasks safely, and automate repeat recovery workflows.",
     siteName: "Kanchi",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kanchi - Self-hosted Celery monitoring",
+    title: "Kanchi - Self-hosted Celery operations",
     description:
-      "Real-time Celery task monitoring with automatic orphan detection and workflow automation.",
+      "Monitor Celery, triage failures, rerun tasks safely, and automate repeat recovery workflows.",
     creator: "@czyber_",
   },
-  metadataBase: new URL("https://getkanchi.com"),
+  metadataBase: new URL("https://kanchi.io"),
 };
 
 export default function RootLayout({

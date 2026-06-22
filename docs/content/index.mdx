@@ -38,8 +38,7 @@ services:
     image: getkanchi/kanchi:latest
     container_name: kanchi
     ports:
-      - "3000:3000"
-      - "8765:8765"
+      - "3000:8765"
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
     volumes:
@@ -57,7 +56,7 @@ export CELERY_BROKER_URL=amqp://user:pass@your-rabbit:5672//
 docker compose up -d --pull always
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and you're done.
+Open [http://localhost:3000/ui](http://localhost:3000/ui) and you're done. The UI, API, WebSocket endpoint, and docs are served by one FastAPI process.
 
 <Cards className="mt-6">
   <Card href="/docs/getting-started/introduction" title="Introduction" description="Learn what Kanchi can do for your Celery infrastructure." />

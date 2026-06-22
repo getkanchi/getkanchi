@@ -1,84 +1,129 @@
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
-  Cpu,
-  Search,
+  ClipboardCheck,
+  GitBranch,
+  RotateCcw,
+  ShieldCheck,
   Workflow,
 } from "lucide-react";
 
-const features = [
+const workflowStages = [
   {
-    title: "Live task monitoring",
+    eyebrow: "Detect",
+    title: "Know what broke while it is still fresh.",
     description:
-      "WebSocket updates so you see tasks as they move through the queue.",
-    Icon: Activity,
-  },
-  {
-    title: "Search and filter that works",
-    description:
-      "Filter by status, task name, worker, or queue with instant feedback.",
-    Icon: Search,
-  },
-  {
-    title: "Orphan detection",
-    description:
-      "Automatically flag lost tasks and retry in batches without log dives.",
+      "Kanchi keeps failed, orphaned, retrying, and running tasks visible with live broker events, worker heartbeat context, and filters that match how incidents are investigated.",
     Icon: AlertTriangle,
+    sample: ["failed tasks: 6 unresolved", "orphaned tasks: 7 detected"],
   },
   {
-    title: "Workflow automation",
+    eyebrow: "Inspect",
+    title: "Open the task, not a pile of logs.",
     description:
-      "Event-driven actions, webhooks, and retries without extra code.",
+      "Task detail pages preserve args, kwargs, traceback, queue, worker, retry chain, rerun lineage, and progress steps in one place your team can link to.",
+    Icon: GitBranch,
+    sample: ["args + kwargs", "traceback + worker", "progress steps"],
+  },
+  {
+    eyebrow: "Recover",
+    title: "Rerun deliberately instead of replaying blind.",
+    description:
+      "Bulk actions open a rerun review where Kanchi checks available payloads, lets you repair inputs, skips unsafe items, and records what happened.",
+    Icon: RotateCcw,
+    sample: ["ready as-is: 12", "needs input: 2", "will rerun: 10"],
+  },
+  {
+    eyebrow: "Automate",
+    title: "Turn repeat incidents into guarded workflows.",
+    description:
+      "Use triggers, conditions, Slack or webhook notifications, retries, cooldowns, and circuit breakers to automate recovery without creating retry loops.",
     Icon: Workflow,
+    sample: ["when task failed", "if retries < 3", "then retry + notify"],
+  },
+];
+
+const productionControls = [
+  {
+    title: "Production access",
+    body: "Basic auth, OAuth, sessions, host/origin controls, and email allowlists for teams that cannot leave dashboards open.",
+    Icon: ShieldCheck,
   },
   {
-    title: "Worker health at a glance",
-    description:
-      "Heartbeat status, load, and utilization so you can spot drift fast.",
-    Icon: Cpu,
-  },
-  {
-    title: "Analytics and history",
-    description:
-      "Daily stats, trend analysis, and task timelines that stay searchable.",
-    Icon: BarChart3,
+    title: "Auditable operations",
+    body: "Manual resolve, unresolve, rerun, skipped, failed, and edited actions are stored so the next person can see what changed.",
+    Icon: ClipboardCheck,
   },
 ];
 
 export function FeaturesSection() {
   return (
-    <section className="relative border-b border-border/60 py-16 md:py-24">
-      <div className="container relative z-10 mx-auto px-4">
-        <div className="max-w-2xl space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-surface/70 px-3 py-1 text-xs font-mono text-muted-foreground">
-            Core features
+    <section className="border-b border-border/60 bg-background py-16 md:py-24">
+      <div className="container mx-auto px-4">
+        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
+          <div>
+            <p className="text-xs font-mono uppercase text-primary">
+              Task operations loop
+            </p>
+            <h2 className="mt-3 max-w-xl text-3xl font-display font-semibold md:text-5xl">
+              Built for the part after the alert fires.
+            </h2>
           </div>
-          <h2 className="text-3xl font-display font-semibold md:text-5xl">
-            Everything you need to debug faster.
-          </h2>
-          <p className="text-base text-muted-foreground md:text-lg">
-            Kanchi keeps the signal high and the noise low with tooling built
-            around how dev teams actually work.
+          <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+            Flower and dashboards are good at telling you that something
+            happened. Kanchi is shaped around what operators do next: inspect
+            the payload, choose a recovery path, leave an audit trail, and
+            automate the repeat case.
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="group rounded-2xl border border-border/50 bg-background/40 p-5 transition duration-200 hover:border-foreground/20 hover:bg-background/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+        <div className="mt-12 grid gap-4 lg:grid-cols-4">
+          {workflowStages.map((stage) => (
+            <article
+              key={stage.title}
+              className="border border-border/60 bg-surface/45 p-5"
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background/60 text-primary">
-                  <feature.Icon className="h-5 w-5" />
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-mono uppercase text-primary">
+                    {stage.eyebrow}
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-foreground">
+                    {stage.title}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-semibold">{feature.title}</h3>
+                <stage.Icon className="h-5 w-5 shrink-0 text-primary" />
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">
-                {feature.description}
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                {stage.description}
               </p>
-            </div>
+              <div className="mt-5 space-y-2 border-t border-border/60 pt-4 font-mono text-xs text-muted-foreground">
+                {stage.sample.map((item) => (
+                  <div key={item} className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 bg-primary" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {productionControls.map((control) => (
+            <article
+              key={control.title}
+              className="flex gap-4 border border-border/60 bg-raised/40 p-5"
+            >
+              <control.Icon className="mt-1 h-5 w-5 shrink-0 text-primary" />
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  {control.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {control.body}
+                </p>
+              </div>
+            </article>
           ))}
         </div>
       </div>

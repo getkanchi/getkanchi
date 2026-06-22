@@ -1,28 +1,66 @@
-# Kanchi Landing Page & Documentation
+# Kanchi Website & Documentation
 
-> Real-time Celery monitoring with automatic orphan detection. Built for developers.
+This repository contains the marketing site, documentation, release notes, and website screenshot capture workflow for Kanchi.
 
-This repository contains the marketing site and documentation for Kanchi.
-
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm start
 ```
 
 The landing page will be available at [http://localhost:3000](http://localhost:3000)
 
-## 📁 Project Structure
+## Common Commands
+
+```bash
+npm run dev              # Start the website locally
+npm run lint             # Run Biome checks
+npm run build            # Build the production site
+npm run capture:kanchi   # Refresh website screenshots from a local Kanchi app
+npm run release:kanchi   # Generate release notes from Kanchi changes
+```
+
+## Kanchi Screenshot Capture
+
+The website screenshots are generated from the real Kanchi application, not hand-built mockups. The capture command expects this repository and `kanchi` to be siblings:
+
+```text
+/repos/private/
+  getkanchi/
+  kanchi/
+```
+
+Run:
+
+```bash
+npm run capture:kanchi
+```
+
+The script will:
+
+1. Seed a local marketing database in `.capture-workbench/`.
+2. Start the Kanchi FastAPI backend and Nuxt frontend on local ports.
+3. Suppress local dev-only overlays such as Nuxt DevTools.
+4. Capture the product screenshots into `public/images/screenshots/`.
+5. Stop the local Kanchi processes when it is done.
+
+Useful options:
+
+```bash
+npm run capture:kanchi -- --headed
+npm run capture:kanchi -- --keep-open
+npm run capture:kanchi -- --kanchi-root /path/to/kanchi
+npm run capture:kanchi -- --frontend-port 3001 --backend-port 8766
+```
+
+If Playwright cannot launch Chromium, install the browser once:
+
+```bash
+npx playwright install chromium
+```
+
+## Project Structure
 
 ```
 .
@@ -32,35 +70,22 @@ The landing page will be available at [http://localhost:3000](http://localhost:3
 │   │   ├── page.tsx           # Home page
 │   │   └── globals.css        # Global styles & Kanchi theme
 │   ├── components/
-│   │   ├── magicui/           # Magic UI components
-│   │   │   ├── terminal.tsx
-│   │   │   ├── bento-grid.tsx
-│   │   │   ├── number-ticker.tsx
-│   │   │   ├── orbiting-circles.tsx
-│   │   │   ├── animated-beam.tsx
-│   │   │   ├── retro-grid.tsx
-│   │   │   ├── shimmer-button.tsx
-│   │   │   ├── border-beam.tsx
-│   │   │   └── animated-grid-pattern.tsx
 │   │   ├── sections/          # Page sections
 │   │   │   ├── hero.tsx
 │   │   │   ├── features.tsx
+│   │   │   ├── screenshots.tsx
 │   │   │   ├── differentiators.tsx
 │   │   │   ├── cta.tsx
 │   │   │   └── footer.tsx
 │   │   └── ui/                # shadcn/ui components
 │   └── lib/
 │       └── utils.ts           # Utility functions
-├── docs/                      # Mintlify documentation
-│   ├── mint.json             # Mintlify config
-│   ├── introduction.mdx
-│   ├── quickstart.mdx
-│   ├── installation.mdx
-│   └── core/
+├── docs/                      # Documentation content
+├── scripts/                   # Release notes and screenshot automation
 └── public/                    # Static assets
 ```
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 
@@ -72,7 +97,6 @@ Based on the Kanchi brand palette:
 - **Warning**: `hsl(45, 85%, 65%)`
 - **Info**: `hsl(199, 89%, 58%)`
 - **Retry**: `hsl(24, 95%, 58%)`
-- **Special**: `hsl(263, 70%, 65%)`
 
 ### Typography
 
@@ -80,84 +104,54 @@ Based on the Kanchi brand palette:
 - **Body**: Inter - Body text and UI
 - **Mono**: JetBrains Mono - Code and technical content
 
-### Magic UI Components Used
-
-- ✅ Terminal - Animated terminal with typing effect
-- ✅ Bento Grid - Compact feature showcase
-- ✅ Number Ticker - Animated statistics
-- ✅ Orbiting Circles - Floating icons around elements
-- ✅ Animated Beam - Connection lines between elements
-- ✅ Retro Grid - Background grid pattern
-- ✅ Shimmer Button - Animated CTA buttons
-- ✅ Border Beam - Hover effects on cards
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
-- **UI Components**: shadcn/ui + Magic UI
+- **UI Components**: shadcn/ui
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
-- **Documentation**: Mintlify
+- **Documentation**: Fumadocs MDX
 
-## 📄 Key Features Highlighted
+## Product Story
 
-1. **Orphan Detection** - Automatic detection and recovery
-2. **Real-Time WebSocket** - Zero-latency monitoring
-3. **Workflow Automation** - Event-driven actions
-4. **Worker Health** - System metrics and monitoring
-5. **Advanced Analytics** - Built-in statistics
-6. **Multi-Environment** - Prod/staging/dev support
+The homepage presents Kanchi as a serious Celery operations cockpit:
 
-## 🎯 Design Philosophy
+1. Real-time task and worker visibility.
+2. Orphan detection and rerun recovery.
+3. Reviewable rerun inputs with safe skips.
+4. Durable action history.
+5. Progress reporting for long-running work.
+6. Workflow guardrails and retention controls.
 
-- **Dark-first** - Optimized for dark mode
-- **Developer-focused** - Technical and precise
-- **Terminal-familiar** - Monospace code blocks
-- **Performance-focused** - Fast animations, no fake loaders
-- **Direct tone** - "No BS, Just Insight"
+## Design Direction
 
-## 📚 Documentation
+- Dark-first and operational.
+- Product screenshots over decorative illustration.
+- Dense enough for engineers, polished enough for buyers.
+- Copy that names real failure modes instead of abstract observability claims.
 
-Documentation is built with Mintlify. To run locally:
+## Documentation
 
-```bash
-# Install Mintlify CLI
-npm i -g mintlify
-
-# Start docs server
-cd docs
-mintlify dev
-```
-
-Documentation will be available at [http://localhost:3000](http://localhost:3000)
-
-## 🚢 Deployment
-
-### Landing Page (Vercel)
+Documentation is compiled into the Next.js app through Fumadocs MDX.
 
 ```bash
-# Deploy to Vercel
-vercel
-
-# Or connect your repo to Vercel for automatic deployments
+npm run dev
 ```
 
-### Documentation (Mintlify)
+Documentation will be available at [http://localhost:3000/docs](http://localhost:3000/docs)
 
-Connect your repository to Mintlify for automatic documentation deployment.
+## Deployment
 
-## 🤝 Contributing
+Pushing this repository to `main` deploys the website through the existing hosting setup. Do not change the GitHub workflows for release note or screenshot work; keep the process local and commit the generated site content.
+
+## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## 📝 License
+## License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
 This software is free and open source, licensed under MIT. You are free to use, modify, and distribute it.
-
----
-
-Built with ❤️ for developers who need real-time Celery monitoring.

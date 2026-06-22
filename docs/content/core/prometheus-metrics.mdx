@@ -10,6 +10,10 @@ Kanchi ships with a Prometheus endpoint so you can scrape task and worker teleme
 The FastAPI backend exposes metrics at `/metrics` (plain text, Prometheus format).
 
 ```bash
+# Docker / production-style single process
+curl http://localhost:3000/metrics
+
+# Local source development
 curl http://localhost:8765/metrics
 ```
 

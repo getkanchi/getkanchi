@@ -31,8 +31,7 @@ The fastest way to run Kanchi is with Docker. No repository cloning required—j
         image: getkanchi/kanchi:latest
         container_name: kanchi
         ports:
-          - "3000:3000"
-          - "8765:8765"
+          - "3000:8765"
         environment:
           # Required: Your Celery broker connection string
           CELERY_BROKER_URL: ${CELERY_BROKER_URL}
@@ -40,9 +39,11 @@ The fastest way to run Kanchi is with Docker. No repository cloning required—j
           # Optional: Database (defaults to SQLite)
           DATABASE_URL: ${DATABASE_URL:-sqlite:////data/kanchi.db}
 
-          # Optional: Frontend URLs
-          NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL:-http://localhost:8765}
-          NUXT_PUBLIC_WS_URL: ${NUXT_PUBLIC_WS_URL:-ws://localhost:8765/ws}
+          # Optional: URL handling for proxies and path-prefixed installs
+          NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL:-}
+          NUXT_PUBLIC_WS_URL: ${NUXT_PUBLIC_WS_URL:-/ws}
+          NUXT_PUBLIC_FRONTEND_URL: ${NUXT_PUBLIC_FRONTEND_URL:-/ui}
+          KANCHI_ROOT_PATH: ${KANCHI_ROOT_PATH:-}
         volumes:
           - kanchi-data:/data
         restart: unless-stopped
@@ -90,7 +91,7 @@ The fastest way to run Kanchi is with Docker. No repository cloning required—j
     docker compose up -d --pull always
     ```
 
-    This pulls the latest image from Docker Hub and starts the container. Access the dashboard at [http://localhost:3000](http://localhost:3000)
+    This pulls the latest image from Docker Hub and starts the container. Access the dashboard at [http://localhost:3000/ui](http://localhost:3000/ui).
   </Step>
 
   <Step>
@@ -119,7 +120,7 @@ If you're developing Kanchi or want to run it without Docker:
     **Install dependencies**
 
     You'll need:
-    - Python 3.8+ with Poetry
+    - Python 3.10+ with Poetry
     - Node.js 20+ with npm
     - A running message broker (RabbitMQ or Redis)
 
@@ -165,7 +166,7 @@ If you're developing Kanchi or want to run it without Docker:
     make dev
     ```
 
-    This starts both the FastAPI backend (port 8765) and Nuxt frontend (port 3000).
+    This starts the FastAPI backend on port `8765` and the Nuxt development frontend on port `3000`.
   </Step>
 
   <Step>
@@ -207,6 +208,10 @@ Tasks will appear in the Kanchi dashboard in real-time as they execute.
     **Check backend health**
 
     ```bash
+    # Docker / production-style single process
+    curl http://localhost:3000/api/health
+
+    # Local source development
     curl http://localhost:8765/api/health
     ```
 
@@ -269,7 +274,7 @@ Tasks will appear in the Kanchi dashboard in real-time as they execute.
   </Accordion>
 
   <Accordion title="Frontend can't connect to backend" value="frontend-connection">
-    **Check API URLs**: Verify `NUXT_PUBLIC_API_URL` and `NUXT_PUBLIC_WS_URL` point to your backend.
+    **Check API URLs**: Docker deployments use same-origin URLs by default. For local source development, verify `NUXT_PUBLIC_API_URL` and `NUXT_PUBLIC_WS_URL` point to your backend.
 
     **CORS issues**: If running backend and frontend on different hosts, configure `ALLOWED_ORIGINS`:
 

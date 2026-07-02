@@ -1,0 +1,47 @@
+---
+title: "Reruns keep positional args"
+description: "Manual reruns and workflow retries now recover missing positional args from earlier task events before submitting replacement work."
+date: "2026-07-02"
+version: "2.0.1"
+tags: ["Bug Fix"]
+---
+
+Kanchi 2.0.1 fixes a rerun edge case for tasks whose failed event no longer
+contained the original positional arguments. Reruns now rebuild the call
+signature from the task history before sending replacement work.
+
+## What's fixed
+
+**Positional args survive failed events**
+Some Celery terminal events can arrive with empty `args` while still carrying
+metadata in `kwargs`. Kanchi now treats `args` and `kwargs` independently, so a
+failed event can keep its current keyword metadata while recovering missing
+positional arguments from the earlier `task-received` event.
+
+**Manual reruns use the recovered call signature**
+Bulk reruns and single-task reruns now look back through task history when the
+latest task snapshot is missing one side of the payload. This prevents reruns
+from submitting an incomplete task when the original call used positional
+arguments.
+
+**Workflow retries get the same protection**
+Automated retry actions now use the same recovery logic as manual reruns. When a
+workflow retries a task, Kanchi prefers the current event payload and fills in
+missing args or kwargs from earlier captured events before calling Celery.
+
+## What's improved
+
+**More reliable stored payload parsing**
+Stored task payloads are parsed as JSON first, with Python literal parsing as a
+fallback. This keeps values such as `true`, `null`, lists, and dictionaries
+intact when they move through the API and database.
+
+**Regression coverage**
+New unit tests cover failed events with metadata-only kwargs, corrupted latest
+snapshots, JSON string payloads, and the rerun API route preserving recovered
+positional args.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. No database
+migrations are required.

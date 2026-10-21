@@ -1,0 +1,96 @@
+---
+title: Search and Filtering
+description: Find tasks with free-text search, structured filters, time ranges, and shareable dashboard links.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The dashboard task table supports three ways to narrow down tasks: free-text
+search, structured filters, and a time range. All three combine, and the
+resulting view is kept in the URL so you can share it.
+
+## Free-text search
+
+Type in the search box to match tasks by name, task ID, worker hostname, event
+type, args, or kwargs. Matching is case-insensitive and finds substrings.
+
+## Filters
+
+Filters narrow the table by a single field. Each active filter appears as a
+badge next to the search box. Click a badge's close button to remove it.
+
+### Filter form
+
+Click **Add filter** next to the search box to build a filter without typing
+the syntax:
+
+1. Choose a **Field**: State, Worker, Task, Queue, or Task ID.
+2. Choose a **Condition**.
+3. Enter a value. For State, pick from the list, or tick several states when
+   the condition is **is one of** or **is not one of**. For other fields,
+   separate multiple values with commas.
+4. Click **Apply filter**.
+
+### Typed filters
+
+You can also type filters straight into the search box:
+
+```text
+field:value             # "is" (exact match)
+field:operator:value    # any operator
+field:in:value1,value2  # multiple values
+```
+
+| Field | Operators |
+| --- | --- |
+| `state` | `is`, `not`, `in`, `not_in` |
+| `worker`, `task`, `queue`, `id` | `is`, `not`, `contains`, `starts`, `in`, `not_in` |
+
+Examples:
+
+```text
+state:FAILED
+state:in:FAILED,RETRY
+worker:contains:prod
+task:starts:billing.
+queue:not:low-priority
+```
+
+Valid states are `PENDING`, `RECEIVED`, `RUNNING`, `SUCCESS`, `FAILED`,
+`RETRY`, `REVOKED`, and `ORPHANED`. While typing, Kanchi suggests fields,
+operators, and values. Press Enter to accept a suggestion or to apply what you
+typed. For multi-value filters, press Enter or click **Apply filter** once you
+have added every value.
+
+<Callout>
+Filters with an unknown field, an empty value, or an unknown state are not
+applied. To filter on a value that contains a colon, use the explicit form,
+for example `worker:is:host:123`.
+</Callout>
+
+## Time range
+
+Use the date picker in the table toolbar to limit results to a start and end
+date and time. Choosing a time range switches the dashboard out of live mode.
+Clear the range to return to recent tasks.
+
+## Shareable links
+
+The dashboard keeps its view in the URL query string:
+
+| Parameter | Meaning |
+| --- | --- |
+| `search` | Free-text search |
+| `filters` | Active filters, separated by `;` |
+| `startTime`, `endTime` | Time range as ISO 8601 timestamps |
+| `sortBy`, `sortOrder` | Sort column and `asc` or `desc` |
+| `page`, `pageSize` | Pagination (page starts at 0) |
+| `environment` | Active environment ID |
+
+Copy the address bar to share the current view. Opening the link restores the
+same search, filters, time range, sorting, and page, and the browser back and
+forward buttons step through earlier views. If the link's environment no longer
+exists or you cannot access it, Kanchi keeps your current environment.
+
+Task detail pages, such as `/ui/tasks/<task-id>`, can also be opened or
+refreshed directly.

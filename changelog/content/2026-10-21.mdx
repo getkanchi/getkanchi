@@ -1,0 +1,71 @@
+---
+title: "Filter form and shareable dashboard links"
+description: "Build task filters from a form, share dashboard views by URL, open task deep links directly, and get reliable workflow action editing."
+date: "2026-10-21"
+version: "2.1.0"
+tags: ["Feature", "Bug Fix"]
+---
+
+Kanchi 2.1.0 makes task search easier to use and easier to share. You can build
+filters from a form instead of typing them, dashboard links now restore the
+exact view they were copied from, and a set of workflow editor bugs is fixed.
+
+## What's new
+
+**Filter form**
+An **Add filter** button next to the search box opens a form where you pick a
+field, a condition, and one or more values. State filters use checkboxes, so you
+can select several states at once without remembering the syntax. The typed
+`field:operator:value` syntax keeps working as before.
+
+## What's improved
+
+**Shareable dashboard URLs**
+The dashboard now keeps search, filters, time range, sorting, page, page size,
+and environment in the URL as `search`, `filters`, `startTime`, `endTime`,
+`sortBy`, `sortOrder`, `page`, `pageSize`, and `environment`. Opening a link
+restores that view, and the browser back and forward buttons move between
+views. The time range picker no longer writes its own duplicate `start` and
+`end` parameters. A link with an unknown or inaccessible environment falls back
+to your active environment.
+
+**Typed filters are easier to finish**
+Pressing Enter after `worker:prod` now applies an `is` filter. Multi-value
+filters (`is one of`, `is not one of`) can be finished with Enter or a new
+**Apply filter** button. Invalid filters, such as unknown fields, empty values,
+or unknown states, are rejected instead of being sent to the API. Values that
+contain a colon, like `worker:is:host:123`, are kept intact.
+
+**Applying a filter keeps your search and time range**
+Adding or removing a filter used to clear the search text and the selected time
+range. Filters now merge with the rest of the view.
+
+**Theme colors**
+Failure cards, alerts, tracebacks, and navigation links now use the shared
+status colors. Light mode has brighter surfaces, more readable status text, and
+visible hover and focus borders.
+
+## What's fixed
+
+**Task deep links**
+Opening a task URL such as `/ui/tasks/<id>` directly, or refreshing it, showed
+the dashboard instead of the task. The UI is now built as a client-rendered app,
+so every route works from a fresh page load.
+
+**Stale search results**
+When several task requests overlapped, a slow, older response could replace
+newer results. Kanchi now only shows the response to the latest request.
+
+**Workflow editor**
+- Adding an action now opens its configuration dialog right away.
+- Cancel in an action's configuration dialog now discards parameter edits
+  instead of saving them.
+- The workflow **Enabled** switch and each action's **Continue on failure**
+  switch now change the saved value.
+
+New Playwright regression tests cover these workflow editor fixes.
+
+---
+
+Upgrade normally: pull the latest image or code and restart. No database
+migrations or configuration changes are required.
